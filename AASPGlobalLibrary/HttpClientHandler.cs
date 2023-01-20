@@ -29,7 +29,7 @@ List<string> odataValues = new()
     "4.0"
 };
 */
-namespace AASPWaynesLibrary
+namespace AASPGlobalLibrary
 {
     public static class HttpClientHandler
     {

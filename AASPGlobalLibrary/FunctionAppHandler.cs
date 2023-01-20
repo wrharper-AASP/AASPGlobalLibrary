@@ -3,7 +3,7 @@ using System.Text;
 using Azure.ResourceManager.AppService;
 
 //Removes the problems with Function App Zip Deploying requiring you to use visual studio to publish updates.
-namespace AASPWaynesLibrary
+namespace AASPGlobalLibrary
 {
     public static class FunctionAppHandler
     {

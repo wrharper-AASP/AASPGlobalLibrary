@@ -1,5 +1,5 @@
 ﻿//Used for a specific error that can happen during dataverse deployment
-namespace AASPWaynesLibrary
+namespace AASPGlobalLibrary
 {
     public partial class VerifyAppId : Form
     {

@@ -2,7 +2,7 @@
 
 //Use this to override Console.Write to a textbox so that you can see log output in WinForms.
 //Make sure to define IsRichTextBox to false first if you are not using a rich text box
-namespace AASPWaynesLibrary
+namespace AASPGlobalLibrary
 {
     public class SetConsoleOutput
     {

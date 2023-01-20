@@ -1,4 +1,4 @@
-﻿namespace AASPWaynesLibrary
+﻿namespace AASPGlobalLibrary
 {
     //This was more for dev overrides if the need arises to alter dataverse connection strings during deployment.
     //Currently not needed and is optional

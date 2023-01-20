@@ -1,7 +1,7 @@
 ﻿//Pop this up if a secret is needed for anything
 //Needs improvement, currently used for API secret to Key Vault
 //Since Key Vault must be a string before being sent anyway, it is currently not a real SecuredString
-namespace AASPWaynesLibrary
+namespace AASPGlobalLibrary
 {
     public partial class SecuredExistingSecret : Form
     {

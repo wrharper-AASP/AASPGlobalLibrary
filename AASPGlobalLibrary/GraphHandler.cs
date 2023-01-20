@@ -4,7 +4,7 @@ using System.Text.Json;
 //Highly subject to change
 //This has the primary handler for using Microsoft Graph API
 //Not widely used yet, just handles Teams Channels
-namespace AASPWaynesLibrary
+namespace AASPGlobalLibrary
 {
     public class GraphHandler
     {

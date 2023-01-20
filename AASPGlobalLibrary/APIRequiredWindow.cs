@@ -1,4 +1,4 @@
-﻿namespace AASPWaynesLibrary
+﻿namespace AASPGlobalLibrary
 {
     //mainly used for auto deployment process because an API will be required one way or another
     public partial class APIRequiredWindow : Form

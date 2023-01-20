@@ -4,7 +4,7 @@ using Azure.Security.KeyVault.Secrets;
 
 //Used to remove complexity for getting secrets from Azure Key Vaults
 //Use Interactive for user browser login, use managed for serverless apps
-namespace AASPWaynesLibrary
+namespace AASPGlobalLibrary
 {
     public class VaultHandler
     {

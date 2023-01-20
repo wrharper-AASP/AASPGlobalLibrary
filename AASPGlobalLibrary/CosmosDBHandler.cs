@@ -4,13 +4,12 @@ using Newtonsoft.Json;
 using System.Net;
 using System.Numerics;
 using Azure.Identity;
-using Newtonsoft.Json.Linq;
 
 //If containers are not locally defined this can get expensive both on cost and performance for the app.
 //It is recommended to locally define a container
 //Make sure to call Init or InitAsync first to select a json file for DbInfo
 //Can be initialized with or without async
-namespace AASPWaynesLibrary
+namespace AASPGlobalLibrary
 {
 #pragma warning disable CS8604
     public class CosmosDBHandler

@@ -1,4 +1,4 @@
-﻿namespace AASPWaynesLibrary
+﻿namespace AASPGlobalLibrary
 {
     partial class ConfirmConnectionString
     {

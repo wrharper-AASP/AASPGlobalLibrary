@@ -3,7 +3,7 @@
 //Used to automatically create Azure API's.
 //A heavily needed process to allow for a lot more automation in the future
 //For those who need app registration
-namespace AASPWaynesLibrary
+namespace AASPGlobalLibrary
 {
     //CRITICAL ERROS WILL OCCUR: web redirect has been disabled. it was creating connection errors to dataverse.
     public class CreateAzureAPIHandler
