@@ -1,7 +1,7 @@
-# AASPGlobalLibrary
+# AASP Global Library
 
-Currently programmed for .Net 6 with C# 8.0 Code analysis. Programmed in Visual Studio 2022 C#.
+The package includes a set of classes that can be used to easily access and manipulate data stored in Azure, CosmosDB, Dataverse, and REST calls. It also includes a set of helper classes that can be used to simplify the process of making REST calls.
 
-The package was created to reduce the complexity of Azure, CosmosDB, Dataverse, and REST calls by a large amount.
+The package also includes a set of unit tests that can be used to ensure that the code is working correctly.
 
-This should greatly speed up future projects that use these.
+Finally, the package includes a set of documentation that explains how to use the package and how to get the most out of it.
