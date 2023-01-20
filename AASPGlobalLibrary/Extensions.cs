@@ -10,6 +10,23 @@ namespace AASPGlobalLibrary
 {
     public static class HttpClientUtils
     {
+        public static async Task DownloadFileAsync(this HttpClient client, string url)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.ShowDialog();
+            using var s = await client.GetStreamAsync(new Uri(url));
+            using var fs = new FileStream(dialog.FileName, FileMode.CreateNew);
+            await s.CopyToAsync(fs);
+        }
+        public static async Task DownloadFileAsync(string url)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.ShowDialog();
+            using var client = new HttpClient();
+            using var s = await client.GetStreamAsync(new Uri(url));
+            using var fs = new FileStream(dialog.FileName, FileMode.CreateNew);
+            await s.CopyToAsync(fs);
+        }
         public static async Task DownloadFileAsync(this HttpClient client, string url, string FileName)
         {
             using var s = await client.GetStreamAsync(new Uri(url));
@@ -122,9 +139,7 @@ namespace AASPGlobalLibrary
             }
             return list.Count == 0 ? null : list;
         }
-        public override void Write(Utf8JsonWriter writer,
-            object value,
-            JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
         {
             // writer.WriteStringValue(value.ToString());
         }
