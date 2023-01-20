@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Net;
 using System.Numerics;
 using Azure.Identity;
+using Newtonsoft.Json.Linq;
 
 //If containers are not locally defined this can get expensive both on cost and performance for the app.
 //It is recommended to locally define a container
@@ -58,6 +59,14 @@ namespace AASPWaynesLibrary
             cosmosClient = new CosmosClient(endpoint, token);//, new CosmosClientOptions() { ApplicationName = "WaynesCosmosDBHandler" });
         }
         //for using the library remotely with admin permissions
+        public void CreateCosmosClientInteractive(TokenCredential tokenC, string? endpoint)
+        {
+            CreateCosmosClient(endpoint, tokenC);
+        }
+        public void CreateCosmosClientManaged(TokenCredential tokenC, string? endpoint)
+        {
+            CreateCosmosClient(endpoint, tokenC);
+        }
         public void CreateCosmosClientInteractive(string? endpoint)
         {
             TokenHandler.tokenCredential ??= new InteractiveBrowserCredential();

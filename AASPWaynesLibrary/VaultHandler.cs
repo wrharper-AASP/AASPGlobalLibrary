@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using Azure.Core;
+using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 
 //Used to remove complexity for getting secrets from Azure Key Vaults
@@ -7,6 +8,19 @@ namespace AASPWaynesLibrary
 {
     public class VaultHandler
     {
+        //In case someone wants to cache the token elsewhere
+        public static async Task<string> GetSecret(TokenCredential tokenC, string keyvaultname, string secret)
+        {
+            var kvUri = "https://" + keyvaultname + ".vault.azure.net";
+
+            SecretClientOptions options = new();
+            options.Retry.MaxRetries = 0;
+            var client = new SecretClient(new Uri(kvUri), tokenC, options);
+
+            KeyVaultSecret Secret = await client.GetSecretAsync(secret);
+
+            return Secret.Value;
+        }
         //just needs the keyvault name and current secret. all environments can use the same secret name but not the same keyvault name.
         public static async Task<string> GetSecretInteractive(string keyvaultname, string secret)
         {

@@ -148,6 +148,27 @@ namespace AASPWaynesLibrary
         #endregion
 
         #region Token Handling
+        public static async Task<string> GetCustomToken(TokenCredential tokenC, string[] scope)
+        {
+            return (await tokenC.GetTokenAsync(new TokenRequestContext(scope), new CancellationToken())).Token;
+        }
+        public static async Task<string> GetDefaultGraphToken(TokenCredential tokenC)
+        {
+            return (await tokenC.GetTokenAsync(new TokenRequestContext(new string[] { "https://graph.microsoft.com/.default" }), new CancellationToken())).Token;
+        }
+        public static async Task<string> GetKeyVaultImpersonationToken(TokenCredential tokenC)
+        {
+            return (await tokenC.GetTokenAsync(new TokenRequestContext(new string[] { "https://vault.azure.net/user_impersonation" }), new CancellationToken())).Token;
+        }
+        public static async Task<string> GetDynamicsImpersonationToken(TokenCredential tokenC, string environmentName)
+        {
+            return (await tokenC.GetTokenAsync(new TokenRequestContext(new string[] { environmentName + "/user_impersonation" }), new CancellationToken())).Token;
+        }
+        public static async Task<string> GetGlobalDynamicsImpersonationToken(TokenCredential tokenC)
+        {
+            return (await tokenC.GetTokenAsync(new TokenRequestContext(new string[] { "https://globaldisco.crm.dynamics.com/user_impersonation" }), new CancellationToken())).Token;
+        }
+
         public static async Task<string> GetCustomToken(string[] scope)
         {
             tokenCredential ??= new InteractiveBrowserCredential();
