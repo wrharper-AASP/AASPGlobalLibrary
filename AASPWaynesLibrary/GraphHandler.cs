@@ -15,8 +15,7 @@ namespace AASPWaynesLibrary
             {
                 // Use Microsoft.Identity.Client to retrieve token
                 //var result = auth;
-                request.Headers.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await TokenHandler.GetDefaultGraphToken());
+                request.Headers.Authorization = HttpClientHandler.SetAuthorizationBearerHeader(await TokenHandler.GetDefaultGraphToken());
             });
 
             return new GraphServiceClient(authProvider);
@@ -49,10 +48,9 @@ namespace AASPWaynesLibrary
         }
         public static async Task<string> POSTTeamsMessageToChannel(string token, string teamsId, string channelId, string message)
         {
-            string baseUrl = "https://graph.microsoft.com/v1.0/";
             JSONSendTeamsMessageToChannel json = new() { body = new() { content = message } };
             string jsonstring = JsonSerializer.Serialize(json);
-            return await HttpClientHandler.PostJsonStringBearer(token, baseUrl, "teams/" + teamsId + "/channels/" + channelId + "/messages", jsonstring);
+            return await HttpClientHandler.PostJsonStringBearerAsync(token, Globals.GraphBase(), "teams/" + teamsId + "/channels/" + channelId + "/messages", jsonstring);
         }
         #endregion
 

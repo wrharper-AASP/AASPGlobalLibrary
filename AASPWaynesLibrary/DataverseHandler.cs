@@ -462,7 +462,7 @@ namespace AASPWaynesLibrary
 
                 string requestUrl = "/api/data/v9.2/fieldsecurityprofiles(" + fieldsecurityprofileid + ")/systemuserprofiles_association/$ref";
 
-                var response = await HttpClientHandler.PostJsonStringBearerWithOData(token, baseUrl, requestUrl, json);
+                var response = await HttpClientHandler.PostJsonStringBearerWithODataAsync(token, baseUrl, requestUrl, json);
                 Console.Write(response);
                 Console.Write(Environment.NewLine + "System Administrator permission assigned.");
                 //return true;
