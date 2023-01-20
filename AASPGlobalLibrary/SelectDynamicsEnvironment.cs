@@ -34,12 +34,19 @@ namespace AASPGlobalLibrary
             InitializeComponent();
             this.button1.Click += (sender, e) =>
             {
+                dataverseHandler.Init();
 #pragma warning disable CS8604
                 dataverseHandler.SetBaseURL(info.value[comboBox1.SelectedIndex].UrlName);
 #pragma warning restore CS8604
-                dataverseHandler.Init();
                 this.Close();
             };
+        }
+
+        //used to keep prefix internal
+        public string InitializeWithPrefixReturn(DataverseHandler dataverseHandler)
+        {
+            this.ShowDialog();
+            return dataverseHandler.DbInfo.StartingPrefix;
         }
 
         private async void Form_Load(object sender, EventArgs e)

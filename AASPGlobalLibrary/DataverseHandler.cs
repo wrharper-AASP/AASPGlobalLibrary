@@ -19,7 +19,12 @@ namespace AASPGlobalLibrary
     //doing it this way will also not require a system user, just need a standard user with high enough credentials.
     public class DataverseHandler
     {
-        JSONInternalDbInfo? DbInfo { get; set; }
+        internal JSONInternalDbInfo? DbInfo { get; set; }
+        //try to avoid needing this
+        //public string GetDBPrefix()
+        //{
+            //return DbInfo.StartingPrefix;
+        //}
         public void Init()
         {
             DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(Globals.OpenJSONFile());
@@ -632,7 +637,7 @@ namespace AASPGlobalLibrary
         #endregion
 
         #region Binded JSONS
-        class JSONInternalDbInfo
+        internal class JSONInternalDbInfo
         {
             public string? StartingPrefix { get; set; }
             public string? api { get; set; }
