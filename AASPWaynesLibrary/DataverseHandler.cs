@@ -28,6 +28,16 @@ namespace AASPWaynesLibrary
         {
             DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(await Globals.OpenJSONFileAsync());
         }
+        public void Init(string environment)
+        {
+            SetBaseURL(environment);
+            DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(Globals.OpenJSONFile());
+        }
+        public async Task InitAsync(string environment)
+        {
+            SetBaseURL(environment);
+            DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(await Globals.OpenJSONFileAsync());
+        }
         string baseUrl = "";
         //make sure to set the baseURL before doing anything else
         internal void SetBaseURL(string environment)
