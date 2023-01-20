@@ -16,6 +16,7 @@ namespace WaynesLibrary
         static IConfidentialClientApplication? app;
         static IPublicClientApplication? publicapp;
 
+        #region Client Handling
         public static async Task<string> GetPublicClientAccessToken(string clientId, string[] scopes, string tenantId)
         {
             publicapp ??= PublicClientApplicationBuilder.Create(clientId)
@@ -37,7 +38,6 @@ namespace WaynesLibrary
             }
             return result.AccessToken;
         }
-
         public static async Task<string> GetConfidentialClientAccessToken(string clientId, string secret, string[] scopes, string tenantId)
         {
             if (app == null)
@@ -75,7 +75,28 @@ namespace WaynesLibrary
 
             return result; 
         }
+        public static ArmClient CreateArmClient()
+        {
+            tokenCredential ??= new InteractiveBrowserCredential();
+            return new ArmClient(tokenCredential);
+        }
+        //must have environmental variable with "vaultname" defined
+        public static SecretClient GetFunctionAppKeyVaultClient(string vaultname = "")
+        {
+            if (vaultname == "")
+            {
+                managedTokenCredential ??= new ManagedIdentityCredential();
+                return new SecretClient(new Uri(Globals.VaultBase(Environment.GetEnvironmentVariable("vaultname"))), managedTokenCredential);
+            }
+            else
+            {
+                tokenCredential ??= new InteractiveBrowserCredential();
+                return new SecretClient(new Uri(vaultname), tokenCredential);
+            }
+        }
+        #endregion
 
+        #region JWT
         public static class JwtGetUsersInfo
         {
             static JwtSecurityToken ParseJwt(string token)
@@ -124,63 +145,40 @@ namespace WaynesLibrary
                 return name;
             }
         }
+        #endregion
 
+        #region Token Handling
         public static async Task<string> GetCustomToken(string[] scope)
         {
             tokenCredential ??= new InteractiveBrowserCredential();
             return (await tokenCredential.GetTokenAsync(new TokenRequestContext(scope), new CancellationToken())).Token;
         }
-
         public static async Task<string> GetCustomManagedToken(string[] scope)
         {
             managedTokenCredential ??= new ManagedIdentityCredential();
             return (await managedTokenCredential.GetTokenAsync(new TokenRequestContext(scope), new CancellationToken())).Token;
         }
-
         public static async Task<string> GetDefaultGraphToken()
         {
             tokenCredential ??= new InteractiveBrowserCredential();
             return (await tokenCredential.GetTokenAsync(new TokenRequestContext(new string[] { "https://graph.microsoft.com/.default" }), new CancellationToken())).Token;
         }
-
         public static async Task<string> GetKeyVaultImpersonationToken()
         {
             tokenCredential ??= new InteractiveBrowserCredential();
             return (await tokenCredential.GetTokenAsync(new TokenRequestContext(new string[] { "https://vault.azure.net/user_impersonation" }), new CancellationToken())).Token;
         }
-
         public static async Task<string> GetDynamicsImpersonationToken(string environmentName)
         {
             tokenCredential ??= new InteractiveBrowserCredential();
             return (await tokenCredential.GetTokenAsync(new TokenRequestContext(new string[] { environmentName + "/user_impersonation" }), new CancellationToken())).Token;
         }
-
         public static async Task<string> GetGlobalDynamicsImpersonationToken()
         {
             tokenCredential ??= new InteractiveBrowserCredential();
             return (await tokenCredential.GetTokenAsync(new TokenRequestContext(new string[] { "https://globaldisco.crm.dynamics.com/user_impersonation" }), new CancellationToken())).Token;
         }
-
-        public static ArmClient CreateArmClient()
-        {
-            tokenCredential ??= new InteractiveBrowserCredential();
-            return new ArmClient(tokenCredential);
-        }
-
-        //must have environmental variable with "vaultname" defined
-        public static SecretClient GetFunctionAppKeyVaultClient(string vaultname = "")
-        {
-            if (vaultname == "")
-            {
-                managedTokenCredential ??= new ManagedIdentityCredential();
-                return new SecretClient(new Uri(Globals.VaultBase(Environment.GetEnvironmentVariable("vaultname"))), managedTokenCredential);
-            }
-            else
-            {
-                tokenCredential ??= new InteractiveBrowserCredential();
-                return new SecretClient(new Uri(vaultname), tokenCredential);
-            }
-        }
+        #endregion
 
         /*public static async Task<string> GetFacebookAPIToken(SecretClient sc)
         {

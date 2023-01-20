@@ -16,7 +16,7 @@ namespace WaynesLibrary
     {
         CosmosClient? cosmosClient;
 
-        JSONInternalDbInfo? DbInfo { get; set; }
+        public JSONInternalDbInfo? DbInfo { get; set; }
         PartitionKey smsParitionKey = new();
         PartitionKey whatsappParitionKey = new();
         PartitionKey accountsParitionKey = new();
@@ -582,7 +582,7 @@ namespace WaynesLibrary
         //partitionkey is needed due to a 10gb limitation with automatic local default partitionkey
         //id format standards is good to do partitionkey + counter
         #region Binded JSONS
-        class JSONInternalDbInfo
+        public class JSONInternalDbInfo
         {
             //shorter = faster and big difference on cost due to byte size
             public string? smsIDName { get; set; }

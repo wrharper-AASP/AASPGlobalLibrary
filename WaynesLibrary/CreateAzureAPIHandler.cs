@@ -18,22 +18,139 @@ namespace WaynesLibrary
         const string dynamicsAppId = "00000007-0000-0000-c000-000000000000";
         const string dynamicsUserImpersonationId = "78ce3f0f-a1ce-49c2-8cde-64b5c0896db4";
 
-        //actions:
-        //Microsoft.DocumentDB/databaseAccounts/readMetadata
-        //Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read
-        //Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/executeQuery
-        //Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/readChangeFeed
-        //should be an internal built in role that is missing, reported to microsoft because it is missing.
-        //public static string cosmosDBReader = "00000000-0000-0000-0000-000000000001";
+        public static async Task<string> AddSecretClientPasswordAsync(GraphServiceClient gs, string appObjectId, string appid, string secretDisplayName, bool infiniteloop = true)
+        {
+            JSONGetClientSecretResponseDataverseAPI content = new()
+            {
+                secretText = ""
+            };
 
-        //actions:
-        //Microsoft.DocumentDB/databaseAccounts/readMetadata
-        //Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*
-        //Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*
-        //should be an internal built in role that is missing, reported to microsoft because it is missing.
-        //public static string cosmosDBContributor = "00000000-0000-0000-0000-000000000002";
+            if (infiniteloop)
+            {
+                while (infiniteloop)
+                {
+                    try
+                    {
+                        var publicClient = new JSONAddClientInfoDataverseAPI.Publicclient(appid);
+                        var end = await gs.Applications[appObjectId].AddPassword(JSONAddClientInfoDataverseAPI.Publicclient.PasswordCredentials(secretDisplayName)).Request().PostAsync();
 
-        //need to find a way to make this more dynamic
+                        content.secretText = end.SecretText;
+
+                        //TODO: data needed for all apps that use it.
+                        //content.secretText
+
+                        infiniteloop = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        //reduce the spam to azure servers and graph api
+                        await Task.Delay(5000);
+                        if (ex.Message.StartsWith("Code: Request_ResourceNotFound"))
+                            Console.Write(Environment.NewLine + "Waiting for app resource to add secret for: " + appid);
+                        else
+                            Console.Write(Environment.NewLine + ex.Message);
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    var publicClient = new JSONAddClientInfoDataverseAPI.Publicclient(appid);
+                    var end = await gs.Applications[appObjectId].AddPassword(JSONAddClientInfoDataverseAPI.Publicclient.PasswordCredentials(secretDisplayName)).Request().PostAsync();
+
+                    content.secretText = end.SecretText;
+
+                    infiniteloop = false;
+                }
+                catch (Exception ex)
+                {
+                    //reduce the spam to azure servers and graph api
+                    if (ex.Message.StartsWith("Code: Request_ResourceNotFound"))
+                        Console.Write(Environment.NewLine + "Infinite loop is off, failed adding password to App Registration Id: " + appObjectId);
+                    else
+                        Console.Write(Environment.NewLine + ex.Message);
+                }
+            }
+            return content.secretText;
+        }
+
+        public static async Task UpdateRedirectUrlsAsync(GraphServiceClient gs, string appObjectId, string appId, bool infiniteloop = true)
+        {
+            JSONAddClientInfoDataverseAPI dataneededaftercreation = new();
+
+            if (infiniteloop)
+            {
+                while (infiniteloop)
+                {
+                    try
+                    {
+                        dataneededaftercreation.publicClient = new JSONAddClientInfoDataverseAPI.Publicclient(appId);
+                        var end = await gs.Applications[appObjectId].Request().UpdateAsync(new Microsoft.Graph.Application()
+                        {
+                            PublicClient = new PublicClientApplication()
+                            {
+                                RedirectUris = dataneededaftercreation.publicClient.redirectUris
+                            }
+                        });
+
+                        infiniteloop = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        //reduce the spam to azure servers and graph api
+                        await Task.Delay(5000);
+                        if (ex.Message.StartsWith("Code: Request_ResourceNotFound"))
+                            Console.Write(Environment.NewLine + "Waiting for valid objectid: " + appObjectId);
+                        else
+                            Console.Write(Environment.NewLine + ex.Message);
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    dataneededaftercreation.publicClient = new JSONAddClientInfoDataverseAPI.Publicclient(appObjectId);
+                    var end = await gs.Applications[appObjectId].Request().UpdateAsync(new Microsoft.Graph.Application()
+                    {
+                        PublicClient = new PublicClientApplication()
+                        {
+                            RedirectUris = dataneededaftercreation.publicClient.redirectUris
+                        }
+                    });
+
+                    infiniteloop = false;
+                }
+                catch (Exception ex)
+                {
+                    //reduce the spam to azure servers and graph api
+                    if (ex.Message.StartsWith("Code: Request_ResourceNotFound"))
+                        Console.Write(Environment.NewLine + "Waiting for app resource to finish adding data for: " + appObjectId);
+                    else
+                        Console.Write(Environment.NewLine + ex.Message);
+                }
+            }
+        }
+
+        public static async Task<Microsoft.Graph.Application> CreateAzureAPIAsync(GraphServiceClient gs, string displayName)
+        {
+            JSONAutoCreateDataverseAPI autoCreateDataverseAPI = new(displayName);
+            var app = await gs.Applications.Request().AddAsync(new Microsoft.Graph.Application()
+            {
+                DisplayName = autoCreateDataverseAPI.displayName,
+                SignInAudience = autoCreateDataverseAPI.signInaudience,
+                Tags = autoCreateDataverseAPI.tags,
+                PublicClient = new PublicClientApplication() { RedirectUris = autoCreateDataverseAPI.publicClient.redirectUris }, // autoCreateDataverseAPI.publicClient.,
+                RequiredResourceAccess = autoCreateDataverseAPI.requiredResourceAccess,
+                //Web = autoCreateDataverseAPI.web,
+
+            });
+            return app;
+        }
+
+        #region Binded JSONS
+        //haven't made dynamic yet
         class JSONAutoCreateDataverseAPI
         {
             public string? displayName { get; set; }
@@ -123,7 +240,6 @@ namespace WaynesLibrary
                 public bool enableIdTokenIssuance { get; set; }
             }
         }
-
         class JSONAddClientInfoDataverseAPI
         {
             public Publicclient? publicClient { get; set; }
@@ -145,12 +261,10 @@ namespace WaynesLibrary
                 }
             }
         }
-
         class JSONGetClientSecretResponseDataverseAPI
         {
             public string? secretText { get; set; }
         }
-
         //for reference of all possibilities
         /*class JSONGetClientSecretResponseDataverseAPI
         {
@@ -162,140 +276,6 @@ namespace WaynesLibrary
             public string? hint { get; set; }
             public string? displayName { get; set; }
         }*/
-
-
-        public static async Task<string> AddSecretClientPasswordAsync(GraphServiceClient gs, string appObjectId, string appid, string secretDisplayName, bool infiniteloop = true)
-        {
-            JSONGetClientSecretResponseDataverseAPI content = new()
-            {
-                secretText = ""
-            };
-
-            if (infiniteloop)
-            {
-                while (infiniteloop)
-                {
-                    try
-                    {
-                        var publicClient = new JSONAddClientInfoDataverseAPI.Publicclient(appid);
-                        var end = await gs.Applications[appObjectId].AddPassword(JSONAddClientInfoDataverseAPI.Publicclient.PasswordCredentials(secretDisplayName)).Request().PostAsync();
-
-                        content.secretText = end.SecretText;
-
-                        //TODO: data needed for all apps that use it.
-                        //content.secretText
-
-                        infiniteloop = false;
-                    }
-                    catch (Exception ex)
-                    {
-                        //reduce the spam to azure servers and graph api
-                        await Task.Delay(5000);
-                        if (ex.Message.StartsWith("Code: Request_ResourceNotFound"))
-                            Console.Write(Environment.NewLine + "Waiting for app resource to add secret for: " + appid);
-                        else
-                            Console.Write(Environment.NewLine + ex.Message);
-                    }
-                }
-            }
-            else
-            {
-                try
-                {
-                    var publicClient = new JSONAddClientInfoDataverseAPI.Publicclient(appid);
-                    var end = await gs.Applications[appObjectId].AddPassword(JSONAddClientInfoDataverseAPI.Publicclient.PasswordCredentials(secretDisplayName)).Request().PostAsync();
-
-                    content.secretText = end.SecretText;
-
-                    infiniteloop = false;
-                }
-                catch (Exception ex)
-                {
-                    //reduce the spam to azure servers and graph api
-                    if (ex.Message.StartsWith("Code: Request_ResourceNotFound"))
-                        Console.Write(Environment.NewLine + "Infinite loop is off, failed adding password to App Registration Id: " + appObjectId);
-                    else
-                        Console.Write(Environment.NewLine + ex.Message);
-                }
-            }
-            return content.secretText;
-        }
-
-        public static class UpdateRedirectUrls
-        {
-            public static async Task UpdateRedirectUrlsAsync(GraphServiceClient gs, string appObjectId, string appId, bool infiniteloop = true)
-            {
-                JSONAddClientInfoDataverseAPI dataneededaftercreation = new();
-
-                if (infiniteloop)
-                {
-                    while (infiniteloop)
-                    {
-                        try
-                        {
-                            dataneededaftercreation.publicClient = new JSONAddClientInfoDataverseAPI.Publicclient(appId);
-                            var end = await gs.Applications[appObjectId].Request().UpdateAsync(new Microsoft.Graph.Application()
-                            {
-                                PublicClient = new PublicClientApplication()
-                                {
-                                    RedirectUris = dataneededaftercreation.publicClient.redirectUris
-                                }
-                            });
-
-                            infiniteloop = false;
-                        }
-                        catch (Exception ex)
-                        {
-                            //reduce the spam to azure servers and graph api
-                            await Task.Delay(5000);
-                            if (ex.Message.StartsWith("Code: Request_ResourceNotFound"))
-                                Console.Write(Environment.NewLine + "Waiting for valid objectid: " + appObjectId);
-                            else
-                                Console.Write(Environment.NewLine + ex.Message);
-                        }
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        dataneededaftercreation.publicClient = new JSONAddClientInfoDataverseAPI.Publicclient(appObjectId);
-                        var end = await gs.Applications[appObjectId].Request().UpdateAsync(new Microsoft.Graph.Application()
-                        {
-                            PublicClient = new PublicClientApplication()
-                            {
-                                RedirectUris = dataneededaftercreation.publicClient.redirectUris
-                            }
-                        });
-
-                        infiniteloop = false;
-                    }
-                    catch (Exception ex)
-                    {
-                        //reduce the spam to azure servers and graph api
-                        if (ex.Message.StartsWith("Code: Request_ResourceNotFound"))
-                            Console.Write(Environment.NewLine + "Waiting for app resource to finish adding data for: " + appObjectId);
-                        else
-                            Console.Write(Environment.NewLine + ex.Message);
-                    }
-                }
-            }
-        }
-
-        public static async Task<Microsoft.Graph.Application> CreateAzureAPIAsync(GraphServiceClient gs, string displayName)
-        {
-            JSONAutoCreateDataverseAPI autoCreateDataverseAPI = new(displayName);
-            var app = await gs.Applications.Request().AddAsync(new Microsoft.Graph.Application()
-            {
-                DisplayName = autoCreateDataverseAPI.displayName,
-                SignInAudience = autoCreateDataverseAPI.signInaudience,
-                Tags = autoCreateDataverseAPI.tags,
-                PublicClient = new PublicClientApplication() { RedirectUris = autoCreateDataverseAPI.publicClient.redirectUris }, // autoCreateDataverseAPI.publicClient.,
-                RequiredResourceAccess = autoCreateDataverseAPI.requiredResourceAccess,
-                //Web = autoCreateDataverseAPI.web,
-
-            });
-            return app;
-        }
+        #endregion
     }
 }

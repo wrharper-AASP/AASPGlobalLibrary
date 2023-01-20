@@ -20,6 +20,7 @@ namespace WaynesLibrary
             return new StringContent(json, Encoding.UTF8, "application/json");
         }
 
+        #region DELETE Handling
         public static async Task<string> DeleteAsync(string token, string url)
         {
             using HttpClient client = new();
@@ -38,7 +39,9 @@ namespace WaynesLibrary
             var response = await client.DeleteAsync(url);
             return await response.Content.ReadAsStringAsync();
         }
+        #endregion
 
+        #region PATCH Handling
         public static async Task<string> PatchJsonStringOdataAsync(string token, string url, string json)
         {
             using HttpClient client = new();
@@ -50,7 +53,9 @@ namespace WaynesLibrary
             var response = await client.PatchAsync(url, content);
             return await response.Content.ReadAsStringAsync();
         }
+        #endregion
 
+        #region GET Handling
         public static async Task<string> GetJsonStringAsync(string token, string baseUrl, string requestUrl="")
         {
             using HttpClient client = new();
@@ -81,7 +86,9 @@ namespace WaynesLibrary
             var type = json.GetType();
             return (TValue)await client.GetFromJsonAsync(baseUrl + requestUrl, type); //"api/data/v9.2/systemusers", type);
         }
+        #endregion
 
+        #region POST Handling
         public static async Task<string> PostJsonStringBearerWithOData(string token, string baseUrl, string requestUrl, string json)
         {
             HttpContent httpContent = ConvertJsonStringToHttpContent(json);
@@ -141,5 +148,6 @@ namespace WaynesLibrary
             var response = await client.PostAsync(baseUrl + requestUrl, httpContent);
             return await response.Content.ReadAsStringAsync();
         }
+        #endregion
     }
 }

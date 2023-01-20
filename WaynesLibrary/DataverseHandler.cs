@@ -19,7 +19,7 @@ namespace WaynesLibrary
     //doing it this way will also not require a system user, just need a standard user with high enough credentials.
     public class DataverseHandler
     {
-        JSONInternalDbInfo? DbInfo { get; set; }
+        public JSONInternalDbInfo? DbInfo { get; set; }
         public void Init()
         {
             DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(Globals.OpenJSONFile());
@@ -622,7 +622,7 @@ namespace WaynesLibrary
         #endregion
 
         #region Binded JSONS
-        class JSONInternalDbInfo
+        public class JSONInternalDbInfo
         {
             public string? StartingPrefix { get; set; }
             public string? api { get; set; }

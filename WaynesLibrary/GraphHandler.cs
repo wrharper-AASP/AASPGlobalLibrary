@@ -8,6 +8,55 @@ namespace WaynesLibrary
 {
     public class GraphHandler
     {
+        //uses a provider to bypass needing an API
+        public static GraphServiceClient GetServiceClientWithoutAPI()
+        {
+            var authProvider = new DelegateAuthenticationProvider(authenticateRequestAsyncDelegate: async (request) =>
+            {
+                // Use Microsoft.Identity.Client to retrieve token
+                //var result = auth;
+                request.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await TokenHandler.GetDefaultGraphToken());
+            });
+
+            return new GraphServiceClient(authProvider);
+        }
+
+        #region Teams Channels GET & POST
+        public static async Task<string> GETTeamsMessagesFromChannel(string token, string teamsId, string channelId)
+        {
+            var jsonstring = await HttpClientHandler.GetJsonStringAsync(token, Globals.GraphBase(), "teams/" + teamsId + "/channels/" + channelId + "/messages");
+            return jsonstring;
+        }
+        public static async Task<string> GETTeamsChannelIdByName(string token, string teamsId, string name)
+        {
+            var jsonstring = await HttpClientHandler.GetJsonStringAsync(token, Globals.GraphBase(), "teams/" + teamsId + "/channels");
+            try
+            {
+                var channels = JsonSerializer.Deserialize<JSONGetTeamsChannels>(jsonstring);
+                for (int i = 0; i < channels.value.Length; i++)
+                {
+                    if (channels.value[i].displayName == name)
+                        return channels.value[i].id;
+                }
+            }
+            catch
+            {
+                var error = JsonSerializer.Deserialize<Globals.JSONRestErrorHandler>(jsonstring);
+                return error.error.code + ": " + error.error.message;
+            }
+            return "";
+        }
+        public static async Task<string> POSTTeamsMessageToChannel(string token, string teamsId, string channelId, string message)
+        {
+            string baseUrl = "https://graph.microsoft.com/v1.0/";
+            JSONSendTeamsMessageToChannel json = new() { body = new() { content = message } };
+            string jsonstring = JsonSerializer.Serialize(json);
+            return await HttpClientHandler.PostJsonStringBearer(token, baseUrl, "teams/" + teamsId + "/channels/" + channelId + "/messages", jsonstring);
+        }
+        #endregion
+
+        #region Binded JSONS
         class JSONSendTeamsMessageToChannel
         {
             public Body? body { get; set; }
@@ -98,51 +147,6 @@ namespace WaynesLibrary
             }
 
         }
-
-        public static async Task<string> GETTeamsMessagesFromChannel(string token, string teamsId, string channelId)
-        {
-            var jsonstring = await HttpClientHandler.GetJsonStringAsync(token, Globals.GraphBase(), "teams/" + teamsId + "/channels/" + channelId + "/messages");
-            return jsonstring;
-        }
-        public static async Task<string> GETTeamsChannelIdByName(string token, string teamsId, string name)
-        {
-            var jsonstring = await HttpClientHandler.GetJsonStringAsync(token, Globals.GraphBase(), "teams/" + teamsId + "/channels");
-            try
-            {
-                var channels = JsonSerializer.Deserialize<JSONGetTeamsChannels>(jsonstring);
-                for (int i = 0; i < channels.value.Length; i++)
-                {
-                    if (channels.value[i].displayName == name)
-                        return channels.value[i].id;
-                }
-            }
-            catch
-            {
-                var error = JsonSerializer.Deserialize<Globals.JSONRestErrorHandler>(jsonstring);
-                return error.error.code + ": " + error.error.message;
-            }
-            return "";
-        }
-        public static async Task<string> POSTTeamsMessageToChannel(string token, string teamsId, string channelId, string message)
-        {
-            string baseUrl = "https://graph.microsoft.com/v1.0/";
-            JSONSendTeamsMessageToChannel json = new() { body = new() { content = message } };
-            string jsonstring = JsonSerializer.Serialize(json);
-            return await HttpClientHandler.PostJsonStringBearer(token, baseUrl, "teams/" + teamsId + "/channels/" + channelId + "/messages", jsonstring);
-        }
-
-        //uses a provider to bypass needing an API
-        public static GraphServiceClient GetServiceClientWithoutAPI()
-        {
-            var authProvider = new DelegateAuthenticationProvider(authenticateRequestAsyncDelegate: async (request) =>
-            {
-                // Use Microsoft.Identity.Client to retrieve token
-                //var result = auth;
-                request.Headers.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await TokenHandler.GetDefaultGraphToken());
-            });
-
-            return new GraphServiceClient(authProvider);
-        }
+        #endregion
     }
 }

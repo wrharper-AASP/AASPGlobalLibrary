@@ -44,6 +44,7 @@ namespace WaynesLibrary
         //WAM specific broker based, token cache will be required
         public static string WebBrokerMSAppxWebLoginAuth(string AppId) { return "ms-appx-web://Microsoft.AAD.BrokerPlugin/" + AppId; }
 
+        #region MISC
         //creates a stream out of a string
         public static Stream GenerateStreamFromString(string s)
         {
@@ -72,6 +73,7 @@ namespace WaynesLibrary
             Match match = Regex.Match(str, @"\d+");
             return match.Success;
         }
+        #endregion
 
         //might not need to have as global...
         /*public static DateTime ConvertShortDateAndShortTimeStringToDateTime(string shortdateANDshorttime)
