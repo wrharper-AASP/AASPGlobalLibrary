@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 
 //Used for any apps that need to log into Dynamics 365
 //Allows you to select any environment and everything can be used based on the selected environment
-namespace WaynesLibrary
+namespace AASPWaynesLibrary
 {
     public partial class SelectDynamicsEnvironment : Form
     {

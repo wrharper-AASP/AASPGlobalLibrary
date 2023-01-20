@@ -1,4 +1,4 @@
-﻿namespace WaynesLibrary
+﻿namespace AASPWaynesLibrary
 {
     partial class VerifyAppId
     {

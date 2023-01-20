@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 //Currently:
 //Fixes System.Text.Json dynamic issues
 //Extends HttpClient to handle downloading files easier
-namespace WaynesLibrary
+namespace AASPWaynesLibrary
 {
     public static class HttpClientUtils
     {

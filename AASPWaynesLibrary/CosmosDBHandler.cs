@@ -9,7 +9,7 @@ using Azure.Identity;
 //It is recommended to locally define a container
 //Make sure to call Init or InitAsync first to select a json file for DbInfo
 //Can be initialized with or without async
-namespace WaynesLibrary
+namespace AASPWaynesLibrary
 {
 #pragma warning disable CS8604
     public class CosmosDBHandler

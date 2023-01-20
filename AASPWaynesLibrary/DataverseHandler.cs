@@ -11,7 +11,7 @@ using Microsoft.Xrm.Sdk;
 //Make sure to call Init first to select the json file for metadata standard DB info
 //SetBaseURL & Init should be called when you use SelectDynamicsEnvironment.cs (required)
 //Can be initialized with or without async
-namespace WaynesLibrary
+namespace AASPWaynesLibrary
 {
 #pragma warning disable CS8604
     //the connection string redirect URL cannot have web enabled in the Azure API or it will fail.

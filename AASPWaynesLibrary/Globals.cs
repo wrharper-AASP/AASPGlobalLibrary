@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 //Highly subject to change
 //This is the main global functions and variables widely used across all apps.
-namespace WaynesLibrary
+namespace AASPWaynesLibrary
 {
     public class Globals
     {

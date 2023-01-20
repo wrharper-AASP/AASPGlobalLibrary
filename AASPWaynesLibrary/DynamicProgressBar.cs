@@ -1,4 +1,4 @@
-﻿namespace WaynesLibrary
+﻿namespace AASPWaynesLibrary
 {
     //Used so you can bring up a progress bar across any application.
     public partial class DynamicProgressBar : Form

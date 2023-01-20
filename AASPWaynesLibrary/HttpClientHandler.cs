@@ -5,7 +5,7 @@ using System.Text;
 //Removes complexity for calling REST
 //Currently handles Dynamics 365, OpenAI, and all standard Bearer tokens
 //All clients are initialized and disposed right after use
-namespace WaynesLibrary
+namespace AASPWaynesLibrary
 {
     public static class HttpClientHandler
     {

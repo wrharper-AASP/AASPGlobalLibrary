@@ -7,7 +7,7 @@ using Microsoft.Identity.Client.Extensions.Msal;
 using System.IdentityModel.Tokens.Jwt;
 
 //Removes a lot of the complexity for Azure Authentication and automatically handles tokens
-namespace WaynesLibrary
+namespace AASPWaynesLibrary
 {
     public class TokenHandler
     {

@@ -3,7 +3,7 @@
 //Just a standard word generator
 //kept old code in case something goes wrong with newer faster idea
 //no longer needs the Newtonsoft library
-namespace WaynesLibrary
+namespace AASPWaynesLibrary
 {
     public static class WordGenerator
     {

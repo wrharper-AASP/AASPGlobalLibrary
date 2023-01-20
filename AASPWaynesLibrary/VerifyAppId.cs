@@ -1,11 +1,10 @@
-﻿namespace WaynesLibrary
+﻿//Used for a specific error that can happen during dataverse deployment
+namespace AASPWaynesLibrary
 {
-    //This was more for dev overrides if the need arises to alter dataverse connection strings during deployment.
-    //Currently not needed and is optional
-    public partial class ConfirmConnectionString : Form
+    public partial class VerifyAppId : Form
     {
         readonly string message = "An API with a dynamics 365 connection is required to continue deployment.";
-        public ConfirmConnectionString()
+        public VerifyAppId()
         {
             InitializeComponent();
             this.button1.Click += (sender, e) =>
