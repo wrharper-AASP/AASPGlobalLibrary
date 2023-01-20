@@ -1,4 +1,4 @@
-# AASPWaynesLibrary
+# AASPGlobalLibrary
 
 Currently programmed for .Net 6 with C# 8.0 Code analysis. Programmed in Visual Studio 2022 C#.
 
