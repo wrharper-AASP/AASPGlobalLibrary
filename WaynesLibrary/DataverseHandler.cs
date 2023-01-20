@@ -19,7 +19,7 @@ namespace WaynesLibrary
     //doing it this way will also not require a system user, just need a standard user with high enough credentials.
     public class DataverseHandler
     {
-        public JSONInternalDbInfo? DbInfo { get; set; }
+        JSONInternalDbInfo? DbInfo { get; set; }
         public void Init()
         {
             DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(Globals.OpenJSONFile());
@@ -489,28 +489,28 @@ namespace WaynesLibrary
                 }
             }
         }
-        public async Task CreateDataverseDatabases(ServiceClient service, string[] databases, string prefix)
+        public async Task CreateDataverseDatabases(ServiceClient service, string[] databases)
         {
-            await CreateEntity(service, prefix, databases[0], "Relational Database to Coordinate WhatsApp and SMS Assigned Messages", "Phone Number", "The primary phone number for assignments", 20);
-            await CreateAccountsDefaultColumns(service, databases[0], prefix);
-            await CreateEntity(service, prefix, databases[1], "Primary SMS Database", "id", "Not needed but required field that does not allow dups.", 1);
-            await CreateSMSDefaultColumns(service, databases[1], prefix);
-            await CreateEntity(service, prefix, databases[2], "Primary WhatsApp Database", "id", "Not needed but required field that does not allow dups.", 1);
-            await CreateWhatsAppDefaultColumns(service, databases[2], prefix);
+            await CreateEntity(service, databases[0], "Relational Database to Coordinate WhatsApp and SMS Assigned Messages", "Phone Number", "The primary phone number for assignments", 20);
+            await CreateAccountsDefaultColumns(service, databases[0]);
+            await CreateEntity(service, databases[1], "Primary SMS Database", "id", "Not needed but required field that does not allow dups.", 1);
+            await CreateSMSDefaultColumns(service, databases[1]);
+            await CreateEntity(service, databases[2], "Primary WhatsApp Database", "id", "Not needed but required field that does not allow dups.", 1);
+            await CreateWhatsAppDefaultColumns(service, databases[2]);
 
             Console.Write(Environment.NewLine + "Dataverse Deployment Finished");
         }
-        static CreateAttributeRequest CreateAttributeMetaData(string name, string dbname, int length, string prefix)
+        CreateAttributeRequest CreateAttributeMetaData(string name, string dbname, int length)
         {
             return new CreateAttributeRequest
             {
                 //must be lowercase or errors will occur
-                EntityName = prefix + dbname.ToLower() + "es",
+                EntityName = DbInfo.StartingPrefix + dbname.ToLower() + "es",
                 Attribute = new StringAttributeMetadata
                 {
                     LogicalName = name,
                     //must be lowercase or errors will occur
-                    SchemaName = prefix + name.ToLower() + "es",
+                    SchemaName = DbInfo.StartingPrefix + name.ToLower() + "es",
                     RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.None),
                     MaxLength = length,
                     FormatName = StringFormatName.Text,
@@ -518,42 +518,42 @@ namespace WaynesLibrary
                 }
             };
         }
-        async Task CreateWhatsAppDefaultColumns(ServiceClient service, string whatsAppDBName, string prefix)
+        async Task CreateWhatsAppDefaultColumns(ServiceClient service, string whatsAppDBName)
         {
             CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
 
-            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, whatsAppDBName, 100, prefix);
-            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, whatsAppDBName, 20, prefix);
-            createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataMessage, whatsAppDBName, 4000, prefix);
-            createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, whatsAppDBName, 20, prefix);
-            createAttributeRequests[4] = CreateAttributeMetaData(DbInfo.metadataTimestamp, whatsAppDBName, 100, prefix);
-            createAttributeRequests[5] = CreateAttributeMetaData(DbInfo.metadataPicPath, whatsAppDBName, 100, prefix);
+            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, whatsAppDBName, 100);
+            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, whatsAppDBName, 20);
+            createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataMessage, whatsAppDBName, 4000);
+            createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, whatsAppDBName, 20);
+            createAttributeRequests[4] = CreateAttributeMetaData(DbInfo.metadataTimestamp, whatsAppDBName, 100);
+            createAttributeRequests[5] = CreateAttributeMetaData(DbInfo.metadataPicPath, whatsAppDBName, 100);
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
-        async Task CreateSMSDefaultColumns(ServiceClient service, string smsDBName, string prefix)
+        async Task CreateSMSDefaultColumns(ServiceClient service, string smsDBName)
         {
             CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
 
-            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, smsDBName, 100, prefix);
-            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, smsDBName, 20, prefix);
-            createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataMessage, smsDBName, 4000, prefix);
-            createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, smsDBName, 20, prefix);
-            createAttributeRequests[4] = CreateAttributeMetaData(DbInfo.metadataTimestamp, smsDBName, 100, prefix);
-            createAttributeRequests[5] = CreateAttributeMetaData(DbInfo.metadataPicPath, smsDBName, 100, prefix);
+            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, smsDBName, 100);
+            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, smsDBName, 20);
+            createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataMessage, smsDBName, 4000);
+            createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, smsDBName, 20);
+            createAttributeRequests[4] = CreateAttributeMetaData(DbInfo.metadataTimestamp, smsDBName, 100);
+            createAttributeRequests[5] = CreateAttributeMetaData(DbInfo.metadataPicPath, smsDBName, 100);
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
-        async Task CreateAccountsDefaultColumns(ServiceClient service, string accountsDBName, string prefix)
+        async Task CreateAccountsDefaultColumns(ServiceClient service, string accountsDBName)
         {
             CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[2];
 
-            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumberID, accountsDBName, 100, prefix);
-            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataEmailAccount, accountsDBName, 100, prefix);
+            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumberID, accountsDBName, 100);
+            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataEmailAccount, accountsDBName, 100);
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
-        static async Task CreateEntity(ServiceClient service, string prefix, string dbName, string dbDescription, string primaryKeyDisplayName, string primaryKeyDescription, int lengthOfPrimaryKey)
+        async Task CreateEntity(ServiceClient service, string dbName, string dbDescription, string primaryKeyDisplayName, string primaryKeyDescription, int lengthOfPrimaryKey)
         {
             CreateEntityRequest createrequest = new()
             {
@@ -561,7 +561,7 @@ namespace WaynesLibrary
                 //Define the entity
                 Entity = new EntityMetadata
                 {
-                    SchemaName = prefix + dbName + "es",
+                    SchemaName = DbInfo.StartingPrefix + dbName + "es",
                     DisplayName = new Microsoft.Xrm.Sdk.Label(dbName, 1033),
                     DisplayCollectionName = new Microsoft.Xrm.Sdk.Label(dbName, 1033),
                     Description = new Microsoft.Xrm.Sdk.Label(dbDescription, 1033),
@@ -574,7 +574,7 @@ namespace WaynesLibrary
                 PrimaryAttribute = new StringAttributeMetadata
                 {
                     //must be lowercase or errors will occur
-                    SchemaName = prefix + dbName.ToLower() + "es",
+                    SchemaName = DbInfo.StartingPrefix + dbName.ToLower() + "es",
                     //SchemaName = prefix + primaryKeyName + "es",
                     RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.None),
                     MaxLength = lengthOfPrimaryKey,
@@ -622,7 +622,7 @@ namespace WaynesLibrary
         #endregion
 
         #region Binded JSONS
-        public class JSONInternalDbInfo
+        class JSONInternalDbInfo
         {
             public string? StartingPrefix { get; set; }
             public string? api { get; set; }
