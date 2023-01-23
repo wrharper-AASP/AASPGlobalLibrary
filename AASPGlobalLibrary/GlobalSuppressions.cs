@@ -145,3 +145,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "member", Target = "~P:AASPGlobalLibrary.DataverseHandler.JSONInternalDbInfo.metadataPicPath")]
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "member", Target = "~P:AASPGlobalLibrary.DataverseHandler.JSONInternalDbInfo.metadataTimestamp")]
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "member", Target = "~P:AASPGlobalLibrary.DataverseHandler.JSONInternalDbInfo.metadataTo")]
+[assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "<Pending>", Scope = "member", Target = "~F:AASPGlobalLibrary.SetConsoleOutput.ControlWriter.IsRichTextBox")]

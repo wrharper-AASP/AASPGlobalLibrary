@@ -8,9 +8,9 @@ namespace AASPGlobalLibrary
     {
         public class ControlWriter : TextWriter
         {
-            public bool IsRichTextBox = true;
+            internal static bool IsRichTextBox;
             readonly Control textbox;
-            public ControlWriter(Control textbox)
+            internal ControlWriter(Control textbox)
             {
                 this.textbox = textbox;
             }
@@ -39,10 +39,12 @@ namespace AASPGlobalLibrary
 
         public SetConsoleOutput(RichTextBox richTextBox)
         {
+            ControlWriter.IsRichTextBox = true;
             Console.SetOut(new ControlWriter(richTextBox));
         }
         public SetConsoleOutput(TextBox richTextBox)
         {
+            ControlWriter.IsRichTextBox = false;
             Console.SetOut(new ControlWriter(richTextBox));
         }
     }
