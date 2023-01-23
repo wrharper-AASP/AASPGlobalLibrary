@@ -1,5 +1,5 @@
-﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
+﻿//using System.Net.Http.Headers;
+//using System.Net.Http.Json;
 
 //Used for any apps that need to log into Dynamics 365
 //Allows you to select any environment and everything can be used based on the selected environment
@@ -32,33 +32,36 @@ namespace AASPGlobalLibrary
         public SelectDynamicsEnvironment(DataverseHandler dataverseHandler)
         {
             InitializeComponent();
-            this.button1.Click += (sender, e) =>
+            comboBox1.Enabled = false;
+            button1.Enabled = false;
+            button1.Click += (sender, e) =>
             {
                 dataverseHandler.Init();
 #pragma warning disable CS8604
                 dataverseHandler.SetBaseURL(info.value[comboBox1.SelectedIndex].UrlName);
 #pragma warning restore CS8604
-                this.Close();
+                Close();
             };
         }
 
         //used to keep prefix internal
         public string InitializeWithPrefixReturn(DataverseHandler dataverseHandler)
         {
-            this.ShowDialog();
+            ShowDialog();
             return dataverseHandler.DbInfo.StartingPrefix;
         }
 
         private async void Form_Load(object sender, EventArgs e)
         {
-            var httpClient = new HttpClient();
+            info = await HttpClientHandler.GetJsonAsync(await TokenHandler.GetGlobalDynamicsImpersonationToken(), Globals.Dynamics365Distro, info);
+            /*var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await TokenHandler.GetGlobalDynamicsImpersonationToken());
             HttpRequestMessage request = new(new("GET"), Globals.Dynamics365Distro);
-            var response = await httpClient.SendAsync(request);
+            var response = await httpClient.SendAsync(request);*/
 
-#pragma warning disable CS8601 // Converting null literal or possible null value to non-nullable type.
-            info = await response.Content.ReadFromJsonAsync<JSONGetDataverseEnvironments>();
-#pragma warning restore CS8601 // Converting null literal or possible null value to non-nullable type.
+//#pragma warning disable CS8601 // Converting null literal or possible null value to non-nullable type.
+            //info = await response.Content.ReadFromJsonAsync<JSONGetDataverseEnvironments>();
+//#pragma warning restore CS8601 // Converting null literal or possible null value to non-nullable type.
 
             if (info.value.Length > 0)
             {
@@ -68,6 +71,12 @@ namespace AASPGlobalLibrary
                 }
                 comboBox1.SelectedIndex = 0;
             }
+        }
+
+        private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            comboBox1.Enabled = true;
+            button1.Enabled = true;
         }
     }
 }

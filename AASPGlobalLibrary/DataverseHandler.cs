@@ -436,7 +436,7 @@ namespace AASPGlobalLibrary
         async Task PostSystemAdminPermissionsToSystemUser(string token, string appId, string selectedOrgId)
         {
             Console.Write(Environment.NewLine + "Assigning System Administrator permission automatically.");
-            var getSystemUsers = await HttpClientHandler.GetJsonAsync(token, baseUrl, DbInfo.api + "systemusers", new JSONGetSystemUsers());
+            var getSystemUsers = await HttpClientHandler.GetJsonAsync(token, baseUrl, new JSONGetSystemUsers(), DbInfo.api + "systemusers");
             string systemuserId = "";
             for (int i = 0; i < getSystemUsers.value.Length; i++)
             {

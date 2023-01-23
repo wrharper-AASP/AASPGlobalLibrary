@@ -220,7 +220,7 @@ namespace AASPGlobalLibrary
             var response = await client.GetAsync(baseUrl + requestUrl);
             return await response.Content.ReadAsStringAsync();*/
         }
-        public static async Task<T> GetJsonAsync<T>(string token, string baseUrl, string requestUrl, T json)
+        public static async Task<T> GetJsonAsync<T>(string token, string baseUrl, T json, string requestUrl = "")
         {
             string[] odataNames = { "OData-MaxVersion", "OData-Version" };
             string[] odataValues = { "4.0", "4.0" };

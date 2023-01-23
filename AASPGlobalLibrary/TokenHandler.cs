@@ -19,9 +19,10 @@ namespace AASPGlobalLibrary
         #region Client Handling
         public static async Task<string> GetPublicClientAccessToken(string clientId, string[] scopes, string tenantId)
         {
+            (_, string redirect) = Globals.LocalHostLoginAuth();
             publicapp ??= PublicClientApplicationBuilder.Create(clientId)
                     .WithTenantId(tenantId)
-                    .WithRedirectUri(Globals.LocalHostLoginAuth())
+                    .WithRedirectUri(redirect)
                     .Build();
 
             var accounts = await publicapp.GetAccountsAsync();
@@ -44,6 +45,7 @@ namespace AASPGlobalLibrary
             {
                 try
                 {
+                    (_, string redirect) = Globals.LocalHostLoginAuth();
                     var storageProperties =
                      new StorageCreationPropertiesBuilder("TokenCache", Environment.CurrentDirectory + "/TokenCache")
                         .Build();
@@ -51,7 +53,7 @@ namespace AASPGlobalLibrary
                     app = ConfidentialClientApplicationBuilder.Create(clientId)
                         .WithClientSecret(secret)
                         .WithTenantId(tenantId)
-                        .WithRedirectUri(Globals.LocalHostLoginAuth())
+                        .WithRedirectUri(redirect)
                         .WithLegacyCacheCompatibility(false)
                         .Build();
 
@@ -62,10 +64,11 @@ namespace AASPGlobalLibrary
                 {
                     Console.Write(Environment.NewLine + "MSAL Failed, reverting to legacy ADAL: " + ex.Message);
 
+                    (_, string redirect) = Globals.LocalHostLoginAuth();
                     app = ConfidentialClientApplicationBuilder.Create(clientId)
                         .WithClientSecret(secret)
                         .WithTenantId(tenantId)
-                        .WithRedirectUri(Globals.LocalHostLoginAuth())
+                        .WithRedirectUri(redirect)
                         .WithLegacyCacheCompatibility(true)
                         .Build();
                 }

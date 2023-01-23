@@ -248,7 +248,8 @@ namespace AASPGlobalLibrary
             {
                 public Publicclient(string appid)
                 {
-                    redirectUris = new string[] { Globals.WebBrokerMSAppxWebLoginAuth(appid), Globals.NativeLoginAuth, Globals.LocalHostLoginAuth("65135") };
+                    (string localhost1, string localhost2) = Globals.LocalHostLoginAuth("65135");
+                    redirectUris = new string[] { Globals.WebBrokerMSAppxWebLoginAuth(appid), Globals.NativeLoginAuth, localhost1, localhost2 };
                 }
                 public string[] redirectUris;
 
