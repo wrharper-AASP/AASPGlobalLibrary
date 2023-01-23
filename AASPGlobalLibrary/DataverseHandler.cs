@@ -23,31 +23,18 @@ namespace AASPGlobalLibrary
         //try to avoid needing this
         //public string GetDBPrefix()
         //{
-            //return DbInfo.StartingPrefix;
+        //return DbInfo.StartingPrefix;
         //}
-        public void Init()
-        {
-            DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(Globals.OpenJSONFile());
-        }
-        public async Task InitAsync()
-        {
-            DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(await Globals.OpenJSONFileAsync());
-        }
+        string baseUrl = "";
         public void Init(string environment)
         {
-            SetBaseURL(environment);
+            baseUrl = "https://" + environment + ".crm.dynamics.com/";
             DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(Globals.OpenJSONFile());
         }
         public async Task InitAsync(string environment)
         {
-            SetBaseURL(environment);
-            DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(await Globals.OpenJSONFileAsync());
-        }
-        string baseUrl = "";
-        //make sure to set the baseURL before doing anything else
-        internal void SetBaseURL(string environment)
-        {
             baseUrl = "https://" + environment + ".crm.dynamics.com/";
+            DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(await Globals.OpenJSONFileAsync());
         }
 
         #region Get Account Info
@@ -497,9 +484,9 @@ namespace AASPGlobalLibrary
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains("An attribute with the specified name "))
-                        Console.Write(Environment.NewLine + createAttributeRequests[i].Attribute.SchemaName + " already exists, skipping");
-                    else
+                    //if (e.Message.Contains("An attribute with the specified name "))
+                        //Console.Write(Environment.NewLine + createAttributeRequests[i].Attribute.SchemaName + " already exists, skipping");
+                    //else
                         Console.Write(Environment.NewLine + "Error: " + e.Message);
                 }
             }
@@ -576,7 +563,7 @@ namespace AASPGlobalLibrary
                 //Define the entity
                 Entity = new EntityMetadata
                 {
-                    SchemaName = DbInfo.StartingPrefix + dbName + "es",
+                    SchemaName = DbInfo.StartingPrefix + dbName.ToLower() + "es",
                     DisplayName = new Microsoft.Xrm.Sdk.Label(dbName, 1033),
                     DisplayCollectionName = new Microsoft.Xrm.Sdk.Label(dbName, 1033),
                     Description = new Microsoft.Xrm.Sdk.Label(dbDescription, 1033),
@@ -606,9 +593,9 @@ namespace AASPGlobalLibrary
             }
             catch (Exception e)
             {
-                if (e.Message.Contains("Failed to create entity with logical name"))
-                    Console.Write(Environment.NewLine + dbName + " already exists, skipping");
-                else
+                //if (e.Message.Contains("Failed to create entity with logical name"))
+                    //Console.Write(Environment.NewLine + dbName + " already exists, skipping");
+                //else
                     Console.Write(Environment.NewLine + "Error: " + e.Message);
             }
         }

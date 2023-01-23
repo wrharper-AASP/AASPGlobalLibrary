@@ -36,9 +36,8 @@ namespace AASPGlobalLibrary
             button1.Enabled = false;
             button1.Click += (sender, e) =>
             {
-                dataverseHandler.Init();
 #pragma warning disable CS8604
-                dataverseHandler.SetBaseURL(info.value[comboBox1.SelectedIndex].UrlName);
+                dataverseHandler.Init(info.value[comboBox1.SelectedIndex].UrlName);
 #pragma warning restore CS8604
                 Close();
             };
