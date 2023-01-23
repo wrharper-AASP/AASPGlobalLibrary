@@ -484,10 +484,10 @@ namespace AASPGlobalLibrary
                 }
                 catch (Exception e)
                 {
-                    //if (e.Message.Contains("An attribute with the specified name "))
+                    //if (e.Message.Contains("Error: An attribute with the specified name "))
                         //Console.Write(Environment.NewLine + createAttributeRequests[i].Attribute.SchemaName + " already exists, skipping");
                     //else
-                        Console.Write(Environment.NewLine + "Error: " + e.Message);
+                    Console.Write(Environment.NewLine + "Error: " + e.Message);
                 }
             }
         }
@@ -593,9 +593,9 @@ namespace AASPGlobalLibrary
             }
             catch (Exception e)
             {
-                //if (e.Message.Contains("Failed to create entity with logical name"))
-                    //Console.Write(Environment.NewLine + dbName + " already exists, skipping");
-                //else
+                if (e.Message.Contains("and object type code -1."))
+                    Console.Write(Environment.NewLine + dbName + " already exists, skipping");
+                else
                     Console.Write(Environment.NewLine + "Error: " + e.Message);
             }
         }
