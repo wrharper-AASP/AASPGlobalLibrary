@@ -5,7 +5,6 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 //The current way dataverse is being handle.
 //Highly subject to change due to uniqueness with API and handling information.
