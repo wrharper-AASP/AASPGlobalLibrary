@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 //The current way dataverse is being handle.
 //Highly subject to change due to uniqueness with API and handling information.
@@ -62,41 +63,97 @@ namespace AASPGlobalLibrary
         #region Create Account
         public async Task CreateAccountDB(string secretId, string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname, string assignedto, string phonenumber, string phonenumberid)
         {
-            var accountsdb = (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
-            ServiceClient service = await CreateStandardAuthServiceClient(secretId, keyvaultname + "io", await TokenHandler.JwtGetUsersInfo.GetUsersEmail());
-            var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb.AsSpan(0, accountsdb.Length - 2)));
-            entity[DbInfo.StartingPrefix + emailAccountColumnName] = assignedto;
-            entity[DbInfo.StartingPrefix + phoneNumberColumnName] = phonenumber;
-            entity[DbInfo.StartingPrefix + phoneNumberIDAccountColumnName] = phonenumberid;
-            _ = await service.CreateAsync(entity);
+            string email = await TokenHandler.JwtGetUsersInfo.GetUsersEmail();
+            string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
+            string filter = "?$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
+            var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
+            string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + filter);
+            dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);
+            if (getjsonid.value.Count == 0)
+            {
+                var accountsdb = (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
+                ServiceClient service = await CreateStandardAuthServiceClient(secretId, keyvaultname + "io", email);
+                var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb.AsSpan(0, accountsdb.Length - 2)));
+                entity[DbInfo.StartingPrefix + emailAccountColumnName] = assignedto;
+                entity[DbInfo.StartingPrefix + phoneNumberColumnName] = phonenumber;
+                entity[DbInfo.StartingPrefix + phoneNumberIDAccountColumnName] = phonenumberid;
+                _ = await service.CreateAsync(entity);
+            }
+            else
+                Console.Write(Environment.NewLine + "Account name already exist, stopping to prevent duplicate.");
         }
         public async Task CreateAccountDBSecret(string secretId, string secretSecret, string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname, string environment, string assignedto, string phonenumber, string phonenumberid)
         {
-            var accountsdb = (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
-            ServiceClient service = await CreateSecretAuthServiceClient(secretId, secretSecret, keyvaultname + "io", environment);
-            var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb.AsSpan(0, accountsdb.Length - 2)));
-            entity[DbInfo.StartingPrefix + emailAccountColumnName] = assignedto;
-            entity[DbInfo.StartingPrefix + phoneNumberColumnName] = phonenumber;
-            entity[DbInfo.StartingPrefix + phoneNumberIDAccountColumnName] = phonenumberid;
-            _ = await service.CreateAsync(entity);
+            string email = await TokenHandler.JwtGetUsersInfo.GetUsersEmail();
+            string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
+            string filter = "?$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
+            var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
+            string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + filter);
+            dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);
+            if (getjsonid.value.Count == 0)
+            {
+                var accountsdb = (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
+                ServiceClient service = await CreateSecretAuthServiceClient(secretId, secretSecret, keyvaultname + "io", environment);
+                var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb.AsSpan(0, accountsdb.Length - 2)));
+                entity[DbInfo.StartingPrefix + emailAccountColumnName] = assignedto;
+                entity[DbInfo.StartingPrefix + phoneNumberColumnName] = phonenumber;
+                entity[DbInfo.StartingPrefix + phoneNumberIDAccountColumnName] = phonenumberid;
+                _ = await service.CreateAsync(entity);
+            }
+            else
+                Console.Write(Environment.NewLine + "Account name already exist, stopping to prevent duplicate.");
         }
         #endregion
 
         #region Update Users Account
-        public async Task<string> PatchAccountDB(string PhoneNumberIDColumnName, string emailAccountColumnName, string secretName, string keyvaultname, string email, dynamic json)
+        public async Task<string> PatchAccountDB(string phoneNumberIDColumnName, string whatsappid, string phoneNumberColumnName, string emailAccountColumnName, string secretName, string keyvaultname, string email, dynamic json, string[] crosscompare)
         {
             string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
-            string select = string.Concat("?$select=", database.AsSpan(0, database.Length - 2), "id");
-            string filter = "&$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
+            //string select = string.Concat("?$select=", database.AsSpan(0, database.Length - 2), "id");
+            //string filter = "&$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
+            string filter = "?$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
-            string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + select + filter);
+            //string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + select + filter);
+            string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + filter);
             try
             {
                 dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);
-                var id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + PhoneNumberIDColumnName, 0);
-                //Console.WriteLine(id);
-                string specificaccount = database + "(" + id + ")";
-                return await HttpClientHandler.PatchJsonStringOdataAsync(token, baseUrl + DbInfo.api + specificaccount, JsonSerializer.Serialize(json));
+                if (getjsonid.value.Count > 1)
+                {
+                    Console.WriteLine("Duplicates of this account have been found.");
+                    string id = "";
+                    for (int i = 0; i < getjsonid.value.Count; i++)
+                    {
+                        if (Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + whatsappid, i) == crosscompare[0]
+                            && Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberColumnName, i) == crosscompare[1])
+                        {
+                            id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, i);
+                            break;
+                        }
+                    }
+                    if (id != "")
+                    {
+                        string specificaccount = database + "(" + id + ")";
+                        return await HttpClientHandler.PatchJsonStringOdataAsync(token, baseUrl + DbInfo.api + specificaccount, JsonSerializer.Serialize(json));
+                    }
+                    else
+                    {
+                        string error = "";
+                        for (int i = 0; i < getjsonid.value.Count; i++)
+                        {
+                            error += Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + whatsappid, i) + " : " + crosscompare[0] + Environment.NewLine;
+                            error += Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberColumnName, i) + " : " + crosscompare[1] + Environment.NewLine;
+                        }
+                        return error;
+                    }
+                }
+                else
+                {
+                    var id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, 0);
+                    //Console.WriteLine(id);
+                    string specificaccount = database + "(" + id + ")";
+                    return await HttpClientHandler.PatchJsonStringOdataAsync(token, baseUrl + DbInfo.api + specificaccount, JsonSerializer.Serialize(json));
+                }
             }
             catch
             {
@@ -230,21 +287,56 @@ namespace AASPGlobalLibrary
         #endregion
 
         #region Delete Account
-        public async Task<string> DeleteAccountDB(string phoneNumberIDColumnName, string emailAccountColumnName, string secretName, string keyvaultname, string email)
+        public async Task<string> DeleteAccountDB(string phoneNumberIDColumnName, string whatsappid, string phoneNumberColumnName, string emailAccountColumnName, string secretName, string keyvaultname, string email, string[] crosscompare)
         {
             string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
-            string select = "?$select=" + DbInfo.StartingPrefix + phoneNumberIDColumnName;
-            string filter = "&$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
+            //string select = "?$select=" + DbInfo.StartingPrefix + phoneNumberIDColumnName;
+            //string filter = "&$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
+            string filter = "?$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
             //Console.WriteLine(baseUrl + api + database + select + filter);
-            string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + select + filter);
+            //string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + select + filter);
+            string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + filter);
 
             try
             {
-                dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);//JsonSerializer.Deserialize<dynamic>(jsonstring);
-                var id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, 0); //getjsonid.value[0].smsapp_phonenumberassignmentsesid;
-                string specificaccount = database + "(" + id + ")";
-                return await HttpClientHandler.DeleteOdataAsync(token, baseUrl + DbInfo.api + specificaccount);
+                dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);
+                if (getjsonid.value.Count > 1)
+                {
+                    Console.WriteLine("Duplicates of this account have been found.");
+                    string id = "";
+                    for (int i = 0; i < getjsonid.value.Count; i++)
+                    {
+                        if (Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + whatsappid, i) == crosscompare[0]
+                            && Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberColumnName, i) == crosscompare[1])
+                        {
+                            id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, i);
+                            break;
+                        }
+                    }
+                    if (id != "")
+                    {
+                        string specificaccount = database + "(" + id + ")";
+                        return await HttpClientHandler.DeleteOdataAsync(token, baseUrl + DbInfo.api + specificaccount);
+                    }
+                    else
+                    {
+                        string error = "";
+                        for (int i = 0; i < getjsonid.value.Count; i++)
+                        {
+                            error += Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + whatsappid, i) + " : " + crosscompare[0] + Environment.NewLine;
+                            error += Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberColumnName, i) + " : " + crosscompare[1] + Environment.NewLine;
+                        }
+                        return error;
+                    }
+                }
+                else
+                {
+                    var id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, 0);
+
+                    string specificaccount = database + "(" + id + ")";
+                    return await HttpClientHandler.DeleteOdataAsync(token, baseUrl + DbInfo.api + specificaccount);
+                }
             }
             catch
             {
