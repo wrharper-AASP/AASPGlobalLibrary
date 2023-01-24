@@ -36,6 +36,11 @@ namespace AASPGlobalLibrary
             baseUrl = "https://" + environment + ".crm.dynamics.com/";
             DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(await Globals.OpenJSONFileAsync());
         }
+        public async Task InitAsync(string environment, string path)
+        {
+            baseUrl = "https://" + environment + ".crm.dynamics.com/";
+            DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(await File.ReadAllBytesAsync(path));
+        }
 
         #region Get Account Info
         public async Task<dynamic> GetAccountsDBJSON(string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname)
