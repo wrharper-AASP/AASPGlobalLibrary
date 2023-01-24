@@ -132,6 +132,11 @@ namespace AASPGlobalLibrary
 
         //removes a lot of complex issues with JSON
         #region JSON Handling
+        public async Task<T> LoadJSON<T>(string path)
+        {
+            try { return JsonSerializer.Deserialize<T>(await File.ReadAllBytesAsync(path)); }
+            catch { return JsonSerializer.Deserialize<T>(await OpenJSONFileAsync()); }
+        }
         public static byte[]? OpenJSONFile()
         {
             OpenFileDialog openFileDialog = new()
