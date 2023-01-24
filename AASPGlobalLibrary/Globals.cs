@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -59,12 +60,23 @@ namespace AASPGlobalLibrary
         //fixes problems with opening links
         public static void OpenLink(string url)
         {
-            ProcessStartInfo processInfo = new()
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                FileName = url,
-                UseShellExecute = true
-            };
-            Process.Start(processInfo);
+                ProcessStartInfo processInfo = new()
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                };
+                Process.Start(processInfo);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Process.Start("xdg-open", url);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start("open", url);
+            }
         }
 
         //checks if a string only has numbers
