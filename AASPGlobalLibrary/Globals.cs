@@ -152,7 +152,6 @@ namespace AASPGlobalLibrary
             }
             else return null;
         }
-
         public static async Task<byte[]?> OpenJSONFileAsync()
         {
             OpenFileDialog openFileDialog = new()
