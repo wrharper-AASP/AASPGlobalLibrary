@@ -62,6 +62,7 @@ namespace AASPGlobalLibrary
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                url = url.Replace("&", "^&");
                 ProcessStartInfo processInfo = new()
                 {
                     FileName = url,
