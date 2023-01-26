@@ -59,7 +59,7 @@ namespace AASPGlobalLibrary
 
             return results;
         }
-        public async Task<dynamic> GetAccountDBJSON(string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname, string Email)
+        public async Task<string> GetAccountDBJSON(string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname, string Email)
         {
             string select = "?$select=" + DbInfo.StartingPrefix + phoneNumberColumnName + "," + DbInfo.StartingPrefix + emailAccountColumnName + "," + DbInfo.StartingPrefix + phoneNumberIDAccountColumnName;
             string filter = "&$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + Email + "%27";
@@ -67,7 +67,7 @@ namespace AASPGlobalLibrary
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
             var results = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl, DbInfo.api + query);
 
-            return Globals.DynamicJsonDeserializer(results);
+            return results;
         }
         #endregion
 
