@@ -89,7 +89,7 @@ namespace AASPGlobalLibrary
             }
             return adminResponses;
         }
-        public static async Task<string> AddOrUpdateAccount(string cosmosRestSite, string assignedto, string phonenumber, string phonenumberid, string roleid)
+        public static async Task<string> AddOrUpdateAccount(string cosmosRestSite, string oldname, string assignedto, string phonenumber, string phonenumberid, string roleid)
         {
             var request = new JSONAdminRequest()
             {
@@ -99,6 +99,7 @@ namespace AASPGlobalLibrary
                 phonenumber = phonenumber,
                 phonenumberid = phonenumberid,
                 roleid = roleid,
+                oldname = oldname,
                 fromm = "",
                 to = "",
                 message = ""
