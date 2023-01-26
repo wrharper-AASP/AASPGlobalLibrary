@@ -62,8 +62,6 @@ namespace AASPGlobalLibrary
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
             return await responsem.Content.ReadAsStringAsync();
         }
-
-
         public static async Task<List<JSONAdminResponse>> GetAllAccounts(string cosmosRestSite)
         {
             var request = new JSONAdminRequest()
