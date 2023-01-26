@@ -47,6 +47,21 @@ namespace AASPGlobalLibrary
         }
 
         #region Admin Specific
+        public static async Task<string> UpdateSMSAndWhatsAppAssignedUser(string cosmosRestSite, string assignedTo)
+        {
+            var request = new JSONAdminRequest()
+            {
+                token = await TokenHandler.GetKeyVaultImpersonationToken(),
+                type = "7",
+                assignedto = assignedTo,
+                fromm = "",
+                to = "",
+                message = ""
+            };
+            using HttpClient client = new();
+            HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
+            return await responsem.Content.ReadAsStringAsync();
+        }
         public static async Task<List<JSONAdminResponse>> GetAllAccounts(string cosmosRestSite)
         {
             var request = new JSONAdminRequest()
@@ -89,8 +104,7 @@ namespace AASPGlobalLibrary
             };
             using HttpClient client = new();
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
-            string response = await responsem.Content.ReadAsStringAsync();
-            return response;
+            return await responsem.Content.ReadAsStringAsync();
         }
         public static async Task<string> DeleteAccount(string cosmosRestSite, string assignedto)
         {
@@ -105,8 +119,7 @@ namespace AASPGlobalLibrary
             };
             using HttpClient client = new();
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
-            string response = await responsem.Content.ReadAsStringAsync();
-            return response;
+            return await responsem.Content.ReadAsStringAsync();
         }
         #endregion
 
