@@ -47,13 +47,14 @@ namespace AASPGlobalLibrary
         }
 
         #region Admin Specific
-        public static async Task<string> UpdateSMSAndWhatsAppAssignedUser(string cosmosRestSite, string assignedTo)
+        public static async Task<string> UpdateSMSAndWhatsAppAssignedUser(string cosmosRestSite, string oldname, string assignedTo)
         {
             var request = new JSONAdminRequest()
             {
                 token = await TokenHandler.GetKeyVaultImpersonationToken(),
                 type = "7",
                 assignedto = assignedTo,
+                oldname = oldname,
                 fromm = "",
                 to = "",
                 message = ""
