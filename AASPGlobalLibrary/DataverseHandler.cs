@@ -50,14 +50,14 @@ namespace AASPGlobalLibrary
         }
 
         #region Get Account Info
-        public async Task<dynamic> GetAccountsDBJSON(string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname)
+        public async Task<string> GetAccountsDBJSON(string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname)
         {
             string select = "?$select=" + DbInfo.StartingPrefix + phoneNumberColumnName + "," + DbInfo.StartingPrefix + emailAccountColumnName + "," + DbInfo.StartingPrefix + phoneNumberIDAccountColumnName;
             string query = DbInfo.StartingPrefix + await VaultHandler.GetSecretInteractive(keyvaultname, secretName) + select;
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
             var results = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl, DbInfo.api + query);
 
-            return Globals.DynamicJsonDeserializer(results);
+            return results;
         }
         public async Task<dynamic> GetAccountDBJSON(string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname, string Email)
         {
