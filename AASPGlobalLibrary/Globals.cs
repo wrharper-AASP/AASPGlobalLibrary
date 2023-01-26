@@ -136,12 +136,12 @@ namespace AASPGlobalLibrary
         {
             return JsonSerializer.Deserialize<T>(await LoadJSONAsBytes(path));
         }
-        public static async Task<T> LoadJSONDynamic<T>(string path)
+        public static async Task<dynamic> LoadJSONDynamic(string path)
         {
             byte[] bytes = await LoadJSONAsBytes(path);
             JsonSerializerOptions options = new();
             options.Converters.Add(new DynamicJsonConverter());
-            return JsonSerializer.Deserialize<T>(bytes, options);
+            return JsonSerializer.Deserialize<dynamic>(bytes, options);
         }
         public static async Task<byte[]> LoadJSONAsBytes(string path)
         {
