@@ -62,6 +62,8 @@ namespace AASPGlobalLibrary
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
             return await responsem.Content.ReadAsStringAsync();
         }
+
+
         public static async Task<List<JSONAdminResponse>> GetAllAccounts(string cosmosRestSite)
         {
             var request = new JSONAdminRequest()
@@ -78,7 +80,8 @@ namespace AASPGlobalLibrary
                 dynamic dynamicResponse = Globals.DynamicJsonDeserializer(response);
                 foreach (var dynamicItem in dynamicResponse.EnumerateArray())
                 {
-                    dynamic d2 = Globals.DynamicJsonDeserializer(dynamicItem.ToString());
+                    string s_item = dynamicItem.ToString();
+                    dynamic d2 = Globals.DynamicJsonDeserializer(s_item);
                     adminResponses.Add(new JSONAdminResponse() { AssignedTo = d2.AssignedTo, PhoneNumber = d2.PhoneNumber, PhoneNumberID = d2.PhoneNumberID, RoleID = d2.RoleID });
                 }
             }
@@ -753,6 +756,7 @@ namespace AASPGlobalLibrary
             public string? phonenumber { get; set; }
             public string? phonenumberid { get; set; }
             public string? roleid { get; set; }
+            public string? oldname { get; set; }
         }
         public class JSONAdminResponse
         {
