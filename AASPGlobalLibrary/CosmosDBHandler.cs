@@ -68,7 +68,7 @@ namespace AASPGlobalLibrary
             var request = new JSONAdminRequest()
             {
                 token = await TokenHandler.GetKeyVaultImpersonationToken(),
-                type = "5"
+                type = "6"
             };
             using HttpClient client = new();
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
