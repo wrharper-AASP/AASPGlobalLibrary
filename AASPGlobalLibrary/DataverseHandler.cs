@@ -42,10 +42,11 @@ namespace AASPGlobalLibrary
             baseUrl = "https://" + environment + ".crm.dynamics.com/";
             DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(await File.ReadAllBytesAsync(path));
         }
-        public void SetCustomPrefix(string environment, string customPrefix)
+        public void SetCustomPrefix(string environment, string customPrefix, string api = "api/data/v9.2/")
         {
             baseUrl = "https://" + environment + ".crm.dynamics.com/";
             DbInfo ??= new();
+            DbInfo.api = api;
             DbInfo.StartingPrefix = customPrefix;
         }
 
