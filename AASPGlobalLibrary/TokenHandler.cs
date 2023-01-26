@@ -130,6 +130,22 @@ namespace AASPGlobalLibrary
                 }
             }
 
+            public static async Task<string> GetUsersEmail(TokenCredential tokenCredential)
+            {
+                JwtSecurityToken jwtSecurity = ParseJwt(await GetKeyVaultImpersonationToken(tokenCredential));
+                string text = jwtSecurity.Payload["ver"].ToString();
+                string name = "";
+
+                if (text == "2.0")
+                {
+                    name = jwtSecurity.Payload["preferred_username"].ToString();
+                }
+                else if (text == "1.0")
+                {
+                    name = jwtSecurity.Payload["upn"].ToString();
+                }
+                return name;
+            }
             public static async Task<string> GetUsersEmail()
             {
                 tokenCredential ??= new InteractiveBrowserCredential();
@@ -146,6 +162,20 @@ namespace AASPGlobalLibrary
                     name = jwtSecurity.Payload["upn"].ToString();
                 }
                 return name;
+            }
+
+            public static async Task<string> GetUsersID()
+            {
+                tokenCredential ??= new InteractiveBrowserCredential();
+                JwtSecurityToken jwtSecurity = ParseJwt(await GetKeyVaultImpersonationToken());
+                string id = jwtSecurity.Payload["oid"].ToString();
+                return id;
+            }
+            public static async Task<string> GetUsersID(TokenCredential tokenCredential)
+            {
+                JwtSecurityToken jwtSecurity = ParseJwt(await GetKeyVaultImpersonationToken(tokenCredential));
+                string id = jwtSecurity.Payload["oid"].ToString();
+                return id;
             }
         }
         #endregion
