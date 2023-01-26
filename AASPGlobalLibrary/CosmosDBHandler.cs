@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Net;
 using System.Numerics;
 using Azure.Identity;
+using System.Net.Http.Json;
 
 //If containers are not locally defined this can get expensive both on cost and performance for the app.
 //It is recommended to locally define a container
@@ -44,6 +45,70 @@ namespace AASPGlobalLibrary
         {
             DbInfo = System.Text.Json.JsonSerializer.Deserialize<JSONInternalDbInfo>(await Globals.OpenJSONFileAsync());
         }
+
+        #region Admin Specific
+        public static async Task<List<JSONAdminResponse>> GetAllAccounts(string cosmosRestSite)
+        {
+            var request = new JSONAdminRequest()
+            {
+                token = await TokenHandler.GetKeyVaultImpersonationToken(),
+                type = "5"
+            };
+            using HttpClient client = new();
+            HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
+            string response = await responsem.Content.ReadAsStringAsync();
+            List<JSONAdminResponse> adminResponses = new();
+            try
+            {
+                dynamic dynamicResponse = Globals.DynamicJsonDeserializer(response);
+                foreach (var dynamicItem in dynamicResponse.EnumerateArray())
+                {
+                    dynamic d2 = Globals.DynamicJsonDeserializer(dynamicItem.ToString());
+                    adminResponses.Add(new JSONAdminResponse() { AssignedTo = d2.AssignedTo, PhoneNumber = d2.PhoneNumber, PhoneNumberID = d2.PhoneNumberID, RoleID = d2.RoleID });
+                }
+            }
+            catch
+            {
+                adminResponses.Add(new JSONAdminResponse() { AssignedTo = response });
+            }
+            return adminResponses;
+        }
+        public static async Task<string> AddOrUpdateAccount(string cosmosRestSite, string assignedto, string phonenumber, string phonenumberid, string roleid)
+        {
+            var request = new JSONAdminRequest()
+            {
+                token = await TokenHandler.GetKeyVaultImpersonationToken(),
+                type = "5",
+                assignedto = assignedto,
+                phonenumber = phonenumber,
+                phonenumberid = phonenumberid,
+                roleid = roleid,
+                fromm = "",
+                to = "",
+                message = ""
+            };
+            using HttpClient client = new();
+            HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
+            string response = await responsem.Content.ReadAsStringAsync();
+            return response;
+        }
+        public static async Task<string> DeleteAccount(string cosmosRestSite, string assignedto)
+        {
+            var request = new JSONAdminRequest()
+            {
+                token = await TokenHandler.GetKeyVaultImpersonationToken(),
+                type = "6",
+                assignedto = assignedto,
+                fromm = "",
+                to = "",
+                message = ""
+            };
+            using HttpClient client = new();
+            HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
+            string response = await responsem.Content.ReadAsStringAsync();
+            return response;
+        }
+        #endregion
 
         #region Cosmos Client Handling
         //keys rotate up to a few seconds to a few days, unreliable connection
@@ -662,6 +727,26 @@ namespace AASPGlobalLibrary
             [JsonProperty(PropertyName = "cid")]
             public string? PartitionKey { get; set; }
             public string? Counter { get; set; }
+        }
+        class JSONAdminRequest
+        {
+            public string? token { get; set; }
+            public string? type { get; set; }
+            public string? fromm { get; set; }
+            public string? to { get; set; }
+            public string? message { get; set; }
+            public string? picturepath { get; set; }
+            public string? assignedto { get; set; }
+            public string? phonenumber { get; set; }
+            public string? phonenumberid { get; set; }
+            public string? roleid { get; set; }
+        }
+        public class JSONAdminResponse
+        {
+            public string? AssignedTo { get; set; }
+            public string? PhoneNumber { get; set; }
+            public string? PhoneNumberID { get; set; }
+            public string? RoleID { get; set; }
         }
         #endregion
     }
