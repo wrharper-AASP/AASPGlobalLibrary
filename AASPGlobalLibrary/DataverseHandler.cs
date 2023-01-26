@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
+using System;
 
 //The current way dataverse is being handle.
 //Highly subject to change due to uniqueness with API and handling information.
@@ -41,8 +42,9 @@ namespace AASPGlobalLibrary
             baseUrl = "https://" + environment + ".crm.dynamics.com/";
             DbInfo = JsonSerializer.Deserialize<JSONInternalDbInfo>(await File.ReadAllBytesAsync(path));
         }
-        public void SetCustomPrefix(string customPrefix)
+        public void SetCustomPrefix(string environment, string customPrefix)
         {
+            baseUrl = "https://" + environment + ".crm.dynamics.com/";
             DbInfo ??= new();
             DbInfo.StartingPrefix = customPrefix;
         }
