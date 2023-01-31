@@ -652,10 +652,11 @@ namespace AASPGlobalLibrary
         }
         async Task CreateAccountsDefaultColumns(ServiceClient service, string accountsDBName)
         {
-            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[2];
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[3];
 
             createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumberID, accountsDBName, 100);
-            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataEmailAccount, accountsDBName, 100);
+            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataPhoneNumberID[..^2], accountsDBName, 100);
+            createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataEmailAccount, accountsDBName, 100);
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
