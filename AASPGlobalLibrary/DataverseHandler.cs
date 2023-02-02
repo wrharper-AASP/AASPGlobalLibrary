@@ -5,9 +5,22 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
-using System;
 
-//The current way dataverse is being handle.
+
+/*
+this will be important when constraining lengths to DB's for perfect locked sizes if the need arises.
+These notes can be ignored if non-devs are looking at this:
+The maximum length for an AAD username (without domain) is 64 characters.
+The maximum length for an AAD custom domain is 48 characters.
+For a non-custom (*.onmicrosoft.com) domain, the string length limit is 27 characters.
+As ".onmicrosoft.com" is 16 characters, this adds up to a 43-character limit in total, slightly less than the custom domain limit.
+So overall, a username in the UPN format (username@domain) has a total string length limit of 113 characters:
+https://learn.microsoft.com/en-us/azure/active-directory/authentication/concept-sspr-policy#userprincipalname-policies-that-apply-to-all-user-accounts
+
+These figures can be found on the official Microsoft documentation here
+*/
+
+//The current way dataverse is being handled.
 //Highly subject to change due to uniqueness with API and handling information.
 //Make sure to call Init first to select the json file for metadata standard DB info
 //SetBaseURL & Init should be called when you use SelectDynamicsEnvironment.cs (required)
@@ -597,11 +610,11 @@ namespace AASPGlobalLibrary
         }
         public async Task CreateDataverseDatabases(ServiceClient service, string[] databases)
         {
-            await CreateEntity(service, databases[0], "Accounts Database", "id", "Will be used for AAD unique identifiers.", 20);
+            await CreateEntity(service, databases[0], "Accounts Database", "id", "Will be used for AAD unique identifiers.", 36);
             await CreateAccountsDefaultColumns(service, databases[0]);
-            await CreateEntity(service, databases[1], "SMS Database", "id", "Will be used for AAD unique identifiers.", 1);
+            await CreateEntity(service, databases[1], "SMS Database", "id", "Will be used for AAD unique identifiers.", 36);
             await CreateSMSDefaultColumns(service, databases[1]);
-            await CreateEntity(service, databases[2], "WhatsApp Database", "id", "Will be used for AAD unique identifiers.", 1);
+            await CreateEntity(service, databases[2], "WhatsApp Database", "id", "Will be used for AAD unique identifiers.", 36);
             await CreateWhatsAppDefaultColumns(service, databases[2]);
 
             Console.Write(Environment.NewLine + "Dataverse Deployment Finished");
