@@ -514,15 +514,15 @@ namespace AASPGlobalLibrary
         public async Task AddSMSItem(Container container, string AssignedUser, string From, string To, string Message, string Timestamp, string PicturesPath = "")
         {
             if (AssignedUser == "")
-                Console.Write("Assigned user cannot be empty.");
+                Console.Write(Environment.NewLine + "Assigned user cannot be empty.");
             else if (From == "")
-                Console.Write("Fromcannot be empty.");
+                Console.Write(Environment.NewLine + "Fromcannot be empty.");
             else if (To == "")
-                Console.Write("To cannot be empty.");
+                Console.Write(Environment.NewLine + "To cannot be empty.");
             else if (Message == "")
-                Console.Write("Message cannot be empty.");
+                Console.Write(Environment.NewLine + "Message cannot be empty.");
             else if (Timestamp == "")
-                Console.Write("Timestamp cannot be empty.");
+                Console.Write(Environment.NewLine + "Timestamp cannot be empty.");
             else
             {
                 JSONSMSInfo jsonInfo = new()
@@ -542,15 +542,15 @@ namespace AASPGlobalLibrary
         public async Task AddWhatsAppItem(Container container, string AssignedUser, string From, string To, string Message, string Timestamp, string PicturesPath = "")
         {
             if (AssignedUser == "")
-                Console.Write("Assigned user cannot be empty.");
+                Console.Write(Environment.NewLine + "Assigned user cannot be empty.");
             else if (From == "")
-                Console.Write("Fromcannot be empty.");
+                Console.Write(Environment.NewLine + "Fromcannot be empty.");
             else if (To == "")
-                Console.Write("To cannot be empty.");
+                Console.Write(Environment.NewLine + "To cannot be empty.");
             else if (Message == "")
-                Console.Write("Message cannot be empty.");
+                Console.Write(Environment.NewLine + "Message cannot be empty.");
             else if (Timestamp == "")
-                Console.Write("Timestamp cannot be empty.");
+                Console.Write(Environment.NewLine + "Timestamp cannot be empty.");
             else
             {
                 JSONWhatsAppInfo jsonInfo = new()
@@ -571,11 +571,11 @@ namespace AASPGlobalLibrary
         public static async Task AddOrUpdateAccountItem(Container container, string AssignedTo, string PhoneNumber, string PhoneNumberID)
         {
             if (AssignedTo == "")
-                Console.Write("Assigned user cannot be empty.");
+                Console.Write(Environment.NewLine + "Assigned user cannot be empty.");
             else if (PhoneNumber == "")
-                Console.Write("Phone Number cannot be empty.");
+                Console.Write(Environment.NewLine + "Phone Number cannot be empty.");
             else if (PhoneNumberID == "")
-                Console.Write("Phone Number ID cannot be empty.");
+                Console.Write(Environment.NewLine + "Phone Number ID cannot be empty.");
             else
             {
                 JSONAccountsInfo jsonInfo = new()

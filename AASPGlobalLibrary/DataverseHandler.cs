@@ -132,7 +132,7 @@ namespace AASPGlobalLibrary
                 dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);
                 if (getjsonid.value.Count > 1)
                 {
-                    Console.WriteLine("Duplicates of this account have been found.");
+                    Console.Write(Environment.NewLine + "Duplicates of this account have been found.");
                     string id = "";
                     for (int i = 0; i < getjsonid.value.Count; i++)
                     {
@@ -162,7 +162,7 @@ namespace AASPGlobalLibrary
                 else
                 {
                     var id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, 0);
-                    //Console.WriteLine(id);
+                    //Console.Write(id);
                     string specificaccount = database + "(" + id + ")";
                     return await HttpClientHandler.PatchJsonStringOdataAsync(token, baseUrl + DbInfo.api + specificaccount, JsonSerializer.Serialize(json));
                 }
@@ -306,7 +306,7 @@ namespace AASPGlobalLibrary
             //string filter = "&$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
             string filter = "?$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
-            //Console.WriteLine(baseUrl + api + database + select + filter);
+            //Console.Write(baseUrl + api + database + select + filter);
             //string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + select + filter);
             string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + filter);
 
@@ -315,7 +315,7 @@ namespace AASPGlobalLibrary
                 dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);
                 if (getjsonid.value.Count > 1)
                 {
-                    Console.WriteLine("Duplicates of this account have been found.");
+                    Console.Write(Environment.NewLine + "Duplicates of this account have been found.");
                     string id = "";
                     for (int i = 0; i < getjsonid.value.Count; i++)
                     {
@@ -392,7 +392,7 @@ namespace AASPGlobalLibrary
 
             var response = await client.GetAsync("businessunits");
             var content = await response.Content.ReadAsStringAsync();
-            //Console.WriteLine(content);
+            //Console.Write(content);
             JSONBusinessUnits? businessUnits = Newtonsoft.Json.JsonConvert.DeserializeObject<JSONBusinessUnits>(content);
             string? businessId = "";
             if (businessUnits != null)
@@ -450,7 +450,7 @@ namespace AASPGlobalLibrary
                     "applicationid", appRegistrationClientId,
                     "defaultodbfoldername", "Dynamics365"
                 };
-            //Console.WriteLine(newAppUser.ToString());
+            //Console.Write(newAppUser.ToString());
             var response = await client.PostAsJsonAsync(baseUrl + DbInfo.api + "systemusers", newAppUser.ToString());
 
             return response;
@@ -597,11 +597,11 @@ namespace AASPGlobalLibrary
         }
         public async Task CreateDataverseDatabases(ServiceClient service, string[] databases)
         {
-            await CreateEntity(service, databases[0], "Relational Database to Coordinate WhatsApp and SMS Assigned Messages", "Phone Number", "The primary phone number for assignments", 20);
+            await CreateEntity(service, databases[0], "Accounts Database", "id", "Will be used for AAD unique identifiers.", 20);
             await CreateAccountsDefaultColumns(service, databases[0]);
-            await CreateEntity(service, databases[1], "Primary SMS Database", "id", "Not needed but required field that does not allow dups.", 1);
+            await CreateEntity(service, databases[1], "SMS Database", "id", "Will be used for AAD unique identifiers.", 1);
             await CreateSMSDefaultColumns(service, databases[1]);
-            await CreateEntity(service, databases[2], "Primary WhatsApp Database", "id", "Not needed but required field that does not allow dups.", 1);
+            await CreateEntity(service, databases[2], "WhatsApp Database", "id", "Will be used for AAD unique identifiers.", 1);
             await CreateWhatsAppDefaultColumns(service, databases[2]);
 
             Console.Write(Environment.NewLine + "Dataverse Deployment Finished");
@@ -654,8 +654,8 @@ namespace AASPGlobalLibrary
         {
             CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[3];
 
-            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumberID, accountsDBName, 100);
-            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataPhoneNumberID[..^2], accountsDBName, 100);
+            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumber, accountsDBName, 100);
+            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataPhoneNumberID, accountsDBName, 100);
             createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataEmailAccount, accountsDBName, 100);
 
             await RunMutiplePushes(service, createAttributeRequests);
@@ -739,6 +739,7 @@ namespace AASPGlobalLibrary
             public string? metadataTimestamp { get; set; }
             public string? metadataPicPath { get; set; }
             public string? metadataEmailNonAccount { get; set; }
+            public string? metadataPhoneNumber { get; set; }
             public string? metadataPhoneNumberID { get; set; }
             public string? metadataEmailAccount { get; set; }
         }
