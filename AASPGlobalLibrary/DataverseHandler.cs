@@ -92,18 +92,24 @@ namespace AASPGlobalLibrary
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
             string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + filter);
             dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);
-            if (getjsonid.value.Count == 0)
+            try
+            {
+                //dynamic json does not detect value correctly even though value equals [] which should translate to count 0.
+                //due to this, the try catch fixes the issue.
+                if (getjsonid.value.Count == 0) { }
+                else Console.Write(Environment.NewLine + "Account name already exists, stopping to prevent duplicate.");
+            }
+            catch
             {
                 var accountsdb = (await VaultHandler.GetSecretInteractive(internalkeyvaultname, secretName)).ToLower();
                 ServiceClient service = await CreateStandardAuthServiceClient(secretId, internalkeyvaultname, assignedto);
                 var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb.AsSpan(0, accountsdb.Length - 2)));
+                //var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb));
                 entity[DbInfo.StartingPrefix + emailAccountColumnName] = assignedto;
                 entity[DbInfo.StartingPrefix + smsPhoneNumber] = phonenumber;
                 entity[DbInfo.StartingPrefix + whatsappid] = phonenumberid;
                 _ = await service.CreateAsync(entity);
             }
-            else
-                Console.Write(Environment.NewLine + "Account name already exists, stopping to prevent duplicate.");
         }
         public async Task CreateAccountDBSecret(string secretId, string secretSecret, string smsPhoneNumber, string emailAccountColumnName, string whatsappid, string secretName, string internalkeyvaultname, string environment, string assignedto, string phonenumber, string phonenumberid)
         {
@@ -112,18 +118,24 @@ namespace AASPGlobalLibrary
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
             string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + filter);
             dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);
-            if (getjsonid.value.Count == 0)
+            try
+            {
+                //dynamic json does not detect value correctly even though value equals [] which should translate to count 0.
+                //due to this, the try catch fixes the issue.
+                if (getjsonid.value.Count == 0) { }
+                else Console.Write(Environment.NewLine + "Account name already exists, stopping to prevent duplicate.");
+            }
+            catch
             {
                 var accountsdb = (await VaultHandler.GetSecretInteractive(internalkeyvaultname, secretName)).ToLower();
                 ServiceClient service = await CreateSecretAuthServiceClient(secretId, secretSecret, internalkeyvaultname, environment);
                 var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb.AsSpan(0, accountsdb.Length - 2)));
+                //var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb));
                 entity[DbInfo.StartingPrefix + emailAccountColumnName] = assignedto;
                 entity[DbInfo.StartingPrefix + smsPhoneNumber] = phonenumber;
                 entity[DbInfo.StartingPrefix + whatsappid] = phonenumberid;
                 _ = await service.CreateAsync(entity);
             }
-            else
-                Console.Write(Environment.NewLine + "Account name already exist, stopping to prevent duplicate.");
         }
         #endregion
 
