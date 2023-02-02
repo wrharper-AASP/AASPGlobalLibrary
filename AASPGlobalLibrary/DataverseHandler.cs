@@ -14,10 +14,10 @@ The maximum length for an AAD username (without domain) is 64 characters.
 The maximum length for an AAD custom domain is 48 characters.
 For a non-custom (*.onmicrosoft.com) domain, the string length limit is 27 characters.
 As ".onmicrosoft.com" is 16 characters, this adds up to a 43-character limit in total, slightly less than the custom domain limit.
-So overall, a username in the UPN format (username@domain) has a total string length limit of 113 characters:
-https://learn.microsoft.com/en-us/azure/active-directory/authentication/concept-sspr-policy#userprincipalname-policies-that-apply-to-all-user-accounts
+So overall, a username in the UPN format (username@domain) has a total string length limit of 113 characters
 
-These figures can be found on the official Microsoft documentation here
+These figures can be found on the official Microsoft documentation here:
+https://learn.microsoft.com/en-us/azure/active-directory/authentication/concept-sspr-policy#userprincipalname-policies-that-apply-to-all-user-accounts
 */
 
 //The current way dataverse is being handled.
