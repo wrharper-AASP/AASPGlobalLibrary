@@ -130,7 +130,7 @@ namespace AASPGlobalLibrary
         #endregion
 
         #region Update Users Account
-        public async Task<string> PatchAccountDB(string phoneNumberIDColumnName, string whatsappid, string smsPhoneNumber, string emailAccountColumnName, string secretName, string keyvaultname, string email, dynamic json, string[] crosscompare)
+        public async Task<string> PatchAccountDB(string accountDBIDColumnName, string whatsappid, string smsPhoneNumber, string emailAccountColumnName, string secretName, string keyvaultname, string email, dynamic json, string[] crosscompare)
         {
             string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
             //string select = string.Concat("?$select=", database.AsSpan(0, database.Length - 2), "id");
@@ -151,7 +151,7 @@ namespace AASPGlobalLibrary
                         if (Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + whatsappid, i) == crosscompare[0]
                             && Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + smsPhoneNumber, i) == crosscompare[1])
                         {
-                            id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, i);
+                            id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + accountDBIDColumnName, i);
                             break;
                         }
                     }
@@ -173,7 +173,7 @@ namespace AASPGlobalLibrary
                 }
                 else
                 {
-                    var id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, 0);
+                    var id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + accountDBIDColumnName, 0);
                     //Console.Write(id);
                     string specificaccount = database + "(" + id + ")";
                     return await HttpClientHandler.PatchJsonStringOdataAsync(token, baseUrl + DbInfo.api + specificaccount, JsonSerializer.Serialize(json));
