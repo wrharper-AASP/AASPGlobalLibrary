@@ -6,7 +6,6 @@ using System.Text.Json;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
 
-
 /*
 this will be important when constraining lengths to DB's for perfect locked sizes if the need arises.
 These notes can be ignored if non-devs are looking at this:
