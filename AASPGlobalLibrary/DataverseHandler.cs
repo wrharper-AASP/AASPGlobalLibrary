@@ -63,18 +63,18 @@ namespace AASPGlobalLibrary
         }
 
         #region Get Account Info
-        public async Task<string> GetAccountsDBJSON(string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname)
+        public async Task<string> GetAccountsDBJSON(string smsPhoneNumber, string emailAccountColumnName, string whatsappid, string secretName, string keyvaultname)
         {
-            string select = "?$select=" + DbInfo.StartingPrefix + phoneNumberColumnName + "," + DbInfo.StartingPrefix + emailAccountColumnName + "," + DbInfo.StartingPrefix + phoneNumberIDAccountColumnName;
+            string select = "?$select=" + DbInfo.StartingPrefix + smsPhoneNumber + "," + DbInfo.StartingPrefix + emailAccountColumnName + "," + DbInfo.StartingPrefix + whatsappid;
             string query = DbInfo.StartingPrefix + await VaultHandler.GetSecretInteractive(keyvaultname, secretName) + select;
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
             var results = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl, DbInfo.api + query);
 
             return results;
         }
-        public async Task<string> GetAccountDBJSON(string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname, string Email)
+        public async Task<string> GetAccountDBJSON(string smsPhoneNumber, string emailAccountColumnName, string whatsappid, string secretName, string keyvaultname, string Email)
         {
-            string select = "?$select=" + DbInfo.StartingPrefix + phoneNumberColumnName + "," + DbInfo.StartingPrefix + emailAccountColumnName + "," + DbInfo.StartingPrefix + phoneNumberIDAccountColumnName;
+            string select = "?$select=" + DbInfo.StartingPrefix + smsPhoneNumber + "," + DbInfo.StartingPrefix + emailAccountColumnName + "," + DbInfo.StartingPrefix + whatsappid;
             string filter = "&$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + Email + "%27";
             string query = DbInfo.StartingPrefix + await VaultHandler.GetSecretInteractive(keyvaultname, secretName) + select + filter;
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
@@ -85,7 +85,7 @@ namespace AASPGlobalLibrary
         #endregion
 
         #region Create Account
-        public async Task CreateAccountDB(string secretId, string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname, string assignedto, string phonenumber, string phonenumberid)
+        public async Task CreateAccountDB(string secretId, string smsPhoneNumber, string emailAccountColumnName, string whatsappid, string secretName, string keyvaultname, string assignedto, string phonenumber, string phonenumberid)
         {
             string email = await TokenHandler.JwtGetUsersInfo.GetUsersEmail();
             string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
@@ -99,14 +99,14 @@ namespace AASPGlobalLibrary
                 ServiceClient service = await CreateStandardAuthServiceClient(secretId, keyvaultname + "io", email);
                 var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb.AsSpan(0, accountsdb.Length - 2)));
                 entity[DbInfo.StartingPrefix + emailAccountColumnName] = assignedto;
-                entity[DbInfo.StartingPrefix + phoneNumberColumnName] = phonenumber;
-                entity[DbInfo.StartingPrefix + phoneNumberIDAccountColumnName] = phonenumberid;
+                entity[DbInfo.StartingPrefix + smsPhoneNumber] = phonenumber;
+                entity[DbInfo.StartingPrefix + whatsappid] = phonenumberid;
                 _ = await service.CreateAsync(entity);
             }
             else
                 Console.Write(Environment.NewLine + "Account name already exist, stopping to prevent duplicate.");
         }
-        public async Task CreateAccountDBSecret(string secretId, string secretSecret, string phoneNumberColumnName, string emailAccountColumnName, string phoneNumberIDAccountColumnName, string secretName, string keyvaultname, string environment, string assignedto, string phonenumber, string phonenumberid)
+        public async Task CreateAccountDBSecret(string secretId, string secretSecret, string smsPhoneNumber, string emailAccountColumnName, string whatsappid, string secretName, string keyvaultname, string environment, string assignedto, string phonenumber, string phonenumberid)
         {
             string email = await TokenHandler.JwtGetUsersInfo.GetUsersEmail();
             string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
@@ -120,8 +120,8 @@ namespace AASPGlobalLibrary
                 ServiceClient service = await CreateSecretAuthServiceClient(secretId, secretSecret, keyvaultname + "io", environment);
                 var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb.AsSpan(0, accountsdb.Length - 2)));
                 entity[DbInfo.StartingPrefix + emailAccountColumnName] = assignedto;
-                entity[DbInfo.StartingPrefix + phoneNumberColumnName] = phonenumber;
-                entity[DbInfo.StartingPrefix + phoneNumberIDAccountColumnName] = phonenumberid;
+                entity[DbInfo.StartingPrefix + smsPhoneNumber] = phonenumber;
+                entity[DbInfo.StartingPrefix + whatsappid] = phonenumberid;
                 _ = await service.CreateAsync(entity);
             }
             else
