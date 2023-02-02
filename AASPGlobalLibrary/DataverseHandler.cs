@@ -130,7 +130,7 @@ namespace AASPGlobalLibrary
         #endregion
 
         #region Update Users Account
-        public async Task<string> PatchAccountDB(string phoneNumberIDColumnName, string whatsappid, string phoneNumberColumnName, string emailAccountColumnName, string secretName, string keyvaultname, string email, dynamic json, string[] crosscompare)
+        public async Task<string> PatchAccountDB(string phoneNumberIDColumnName, string whatsappid, string smsPhoneNumber, string emailAccountColumnName, string secretName, string keyvaultname, string email, dynamic json, string[] crosscompare)
         {
             string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
             //string select = string.Concat("?$select=", database.AsSpan(0, database.Length - 2), "id");
@@ -149,7 +149,7 @@ namespace AASPGlobalLibrary
                     for (int i = 0; i < getjsonid.value.Count; i++)
                     {
                         if (Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + whatsappid, i) == crosscompare[0]
-                            && Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberColumnName, i) == crosscompare[1])
+                            && Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + smsPhoneNumber, i) == crosscompare[1])
                         {
                             id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, i);
                             break;
@@ -166,7 +166,7 @@ namespace AASPGlobalLibrary
                         for (int i = 0; i < getjsonid.value.Count; i++)
                         {
                             error += Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + whatsappid, i) + " : " + crosscompare[0] + Environment.NewLine;
-                            error += Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberColumnName, i) + " : " + crosscompare[1] + Environment.NewLine;
+                            error += Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + smsPhoneNumber, i) + " : " + crosscompare[1] + Environment.NewLine;
                         }
                         return error;
                     }
@@ -311,7 +311,7 @@ namespace AASPGlobalLibrary
         #endregion
 
         #region Delete Account
-        public async Task<string> DeleteAccountDB(string phoneNumberIDColumnName, string whatsappid, string phoneNumberColumnName, string emailAccountColumnName, string secretName, string keyvaultname, string email, string[] crosscompare)
+        public async Task<string> DeleteAccountDB(string accountDBIDColumnName, string whatsappid, string smsPhoneNumber, string emailAccountColumnName, string secretName, string keyvaultname, string email, string[] crosscompare)
         {
             string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
             //string select = "?$select=" + DbInfo.StartingPrefix + phoneNumberIDColumnName;
@@ -332,9 +332,9 @@ namespace AASPGlobalLibrary
                     for (int i = 0; i < getjsonid.value.Count; i++)
                     {
                         if (Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + whatsappid, i) == crosscompare[0]
-                            && Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberColumnName, i) == crosscompare[1])
+                            && Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + smsPhoneNumber, i) == crosscompare[1])
                         {
-                            id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, i);
+                            id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + accountDBIDColumnName, i);
                             break;
                         }
                     }
@@ -349,14 +349,14 @@ namespace AASPGlobalLibrary
                         for (int i = 0; i < getjsonid.value.Count; i++)
                         {
                             error += Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + whatsappid, i) + " : " + crosscompare[0] + Environment.NewLine;
-                            error += Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberColumnName, i) + " : " + crosscompare[1] + Environment.NewLine;
+                            error += Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + smsPhoneNumber, i) + " : " + crosscompare[1] + Environment.NewLine;
                         }
                         return error;
                     }
                 }
                 else
                 {
-                    var id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + phoneNumberIDColumnName, 0);
+                    var id = Globals.FindDynamicDataverseValue(getjsonid, DbInfo.StartingPrefix + accountDBIDColumnName, 0);
 
                     string specificaccount = database + "(" + id + ")";
                     return await HttpClientHandler.DeleteOdataAsync(token, baseUrl + DbInfo.api + specificaccount);
