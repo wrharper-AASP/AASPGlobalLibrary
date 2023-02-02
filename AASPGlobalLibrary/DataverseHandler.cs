@@ -85,18 +85,17 @@ namespace AASPGlobalLibrary
         #endregion
 
         #region Create Account
-        public async Task CreateAccountDB(string secretId, string smsPhoneNumber, string emailAccountColumnName, string whatsappid, string secretName, string keyvaultname, string assignedto, string phonenumber, string phonenumberid)
+        public async Task CreateAccountDB(string secretId, string smsPhoneNumber, string emailAccountColumnName, string whatsappid, string secretName, string internalkeyvaultname, string assignedto, string phonenumber, string phonenumberid)
         {
-            string email = await TokenHandler.JwtGetUsersInfo.GetUsersEmail();
-            string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
-            string filter = "?$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
+            string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(internalkeyvaultname, secretName)).ToLower();
+            string filter = "?$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + assignedto + "%27";
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
             string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + filter);
             dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);
             if (getjsonid.value.Count == 0)
             {
-                var accountsdb = (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
-                ServiceClient service = await CreateStandardAuthServiceClient(secretId, keyvaultname + "io", email);
+                var accountsdb = (await VaultHandler.GetSecretInteractive(internalkeyvaultname, secretName)).ToLower();
+                ServiceClient service = await CreateStandardAuthServiceClient(secretId, internalkeyvaultname, assignedto);
                 var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb.AsSpan(0, accountsdb.Length - 2)));
                 entity[DbInfo.StartingPrefix + emailAccountColumnName] = assignedto;
                 entity[DbInfo.StartingPrefix + smsPhoneNumber] = phonenumber;
@@ -104,20 +103,19 @@ namespace AASPGlobalLibrary
                 _ = await service.CreateAsync(entity);
             }
             else
-                Console.Write(Environment.NewLine + "Account name already exist, stopping to prevent duplicate.");
+                Console.Write(Environment.NewLine + "Account name already exists, stopping to prevent duplicate.");
         }
-        public async Task CreateAccountDBSecret(string secretId, string secretSecret, string smsPhoneNumber, string emailAccountColumnName, string whatsappid, string secretName, string keyvaultname, string environment, string assignedto, string phonenumber, string phonenumberid)
+        public async Task CreateAccountDBSecret(string secretId, string secretSecret, string smsPhoneNumber, string emailAccountColumnName, string whatsappid, string secretName, string internalkeyvaultname, string environment, string assignedto, string phonenumber, string phonenumberid)
         {
-            string email = await TokenHandler.JwtGetUsersInfo.GetUsersEmail();
-            string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
-            string filter = "?$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + email + "%27";
+            string database = DbInfo.StartingPrefix + (await VaultHandler.GetSecretInteractive(internalkeyvaultname, secretName)).ToLower();
+            string filter = "?$filter=" + DbInfo.StartingPrefix + emailAccountColumnName + "%20eq%20%27" + assignedto + "%27";
             var token = await TokenHandler.GetDynamicsImpersonationToken(baseUrl);
             string jsonstring = await HttpClientHandler.GetJsonStringOdataAsync(token, baseUrl + DbInfo.api + database + filter);
             dynamic getjsonid = Globals.DynamicJsonDeserializer(jsonstring);
             if (getjsonid.value.Count == 0)
             {
-                var accountsdb = (await VaultHandler.GetSecretInteractive(keyvaultname, secretName)).ToLower();
-                ServiceClient service = await CreateSecretAuthServiceClient(secretId, secretSecret, keyvaultname + "io", environment);
+                var accountsdb = (await VaultHandler.GetSecretInteractive(internalkeyvaultname, secretName)).ToLower();
+                ServiceClient service = await CreateSecretAuthServiceClient(secretId, secretSecret, internalkeyvaultname, environment);
                 var entity = new Entity(string.Concat(DbInfo.StartingPrefix, accountsdb.AsSpan(0, accountsdb.Length - 2)));
                 entity[DbInfo.StartingPrefix + emailAccountColumnName] = assignedto;
                 entity[DbInfo.StartingPrefix + smsPhoneNumber] = phonenumber;
