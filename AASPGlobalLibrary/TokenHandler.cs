@@ -5,6 +5,7 @@ using Azure.Security.KeyVault.Secrets;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
 
 //Removes a lot of the complexity for Azure Authentication and automatically handles tokens
 namespace AASPGlobalLibrary
@@ -17,13 +18,23 @@ namespace AASPGlobalLibrary
         static IPublicClientApplication? publicapp;
 
         #region Client Handling
-        public static async Task<string> GetPublicClientAccessToken(string clientId, string[] scopes, string tenantId)
+        public static async Task<string> GetPublicClientAccessToken(string clientId, string[] scopes, string tenantId, bool UseHttps=false)
         {
-            (_, string redirect) = Globals.LocalHostLoginAuth();
-            publicapp ??= PublicClientApplicationBuilder.Create(clientId)
-                    .WithTenantId(tenantId)
-                    .WithRedirectUri(redirect)
-                    .Build();
+            (string redirect2, string redirect) = Globals.LocalHostLoginAuth();
+            if (!UseHttps)
+            {
+                publicapp ??= PublicClientApplicationBuilder.Create(clientId)
+                        .WithTenantId(tenantId)
+                        .WithRedirectUri(redirect2)
+                        .Build();
+            }
+            else
+            {
+                publicapp ??= PublicClientApplicationBuilder.Create(clientId)
+                        .WithTenantId(tenantId)
+                        .WithRedirectUri(redirect)
+                        .Build();
+            }
 
             var accounts = await publicapp.GetAccountsAsync();
             AuthenticationResult result;
@@ -181,6 +192,31 @@ namespace AASPGlobalLibrary
         #endregion
 
         #region Token Handling
+        class JSONOAuthToken
+        {
+            public string? token_type { get; set; }
+            public int expires_in { get; set; }
+            public int ext_expires_in { get; set; }
+            public string? access_token { get; set; }
+        }
+        public static async Task<string> GetOAuthDirectToken(string tenantid, string clientid, string clientsecret, string scope)
+        {
+            using (HttpClient client = new())
+            {
+                var data = new[]
+                {
+                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                    new KeyValuePair<string, string>("client_id", clientid),
+                    new KeyValuePair<string, string>("scope", scope),
+                    new KeyValuePair<string, string>("client_secret", clientsecret),
+                };
+                var formurl = new FormUrlEncodedContent(data);
+                HttpResponseMessage response = await client.PostAsync("https://login.microsoftonline.com/" + tenantid + "/oauth2/v2.0/token", formurl);
+                JSONOAuthToken oauth = JsonSerializer.Deserialize<JSONOAuthToken>(await response.Content.ReadAsStringAsync());
+                return oauth.access_token;
+            }
+        }
+
         public static async Task<string> GetCustomToken(TokenCredential tokenC, string[] scope)
         {
             return (await tokenC.GetTokenAsync(new TokenRequestContext(scope), new CancellationToken())).Token;

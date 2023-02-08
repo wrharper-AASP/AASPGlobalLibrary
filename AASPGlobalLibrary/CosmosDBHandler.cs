@@ -54,10 +54,7 @@ namespace AASPGlobalLibrary
                 token = await TokenHandler.GetKeyVaultImpersonationToken(),
                 type = "7",
                 assignedto = assignedTo,
-                oldname = oldname,
-                fromm = "",
-                to = "",
-                message = ""
+                oldname = oldname
             };
             using HttpClient client = new();
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
@@ -65,7 +62,7 @@ namespace AASPGlobalLibrary
         }
         public static async Task<List<JSONAdminResponse>> GetAllAccounts(string cosmosRestSite)
         {
-            var request = new JSONAdminRequest()
+            var request = new JSONGetRequest()
             {
                 token = await TokenHandler.GetKeyVaultImpersonationToken(),
                 type = "6"
@@ -100,10 +97,7 @@ namespace AASPGlobalLibrary
                 phonenumber = phonenumber,
                 phonenumberid = phonenumberid,
                 roleid = roleid,
-                oldname = oldname,
-                fromm = "",
-                to = "",
-                message = ""
+                oldname = oldname
             };
             using HttpClient client = new();
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
@@ -116,9 +110,6 @@ namespace AASPGlobalLibrary
                 token = await TokenHandler.GetKeyVaultImpersonationToken(),
                 type = "6",
                 assignedto = assignedto,
-                fromm = "",
-                to = "",
-                message = ""
             };
             using HttpClient client = new();
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
@@ -743,6 +734,11 @@ namespace AASPGlobalLibrary
             [JsonProperty(PropertyName = "cid")]
             public string? PartitionKey { get; set; }
             public string? Counter { get; set; }
+        }
+        class JSONGetRequest
+        {
+            public string? token { get; set; }
+            public string? type { get; set; }
         }
         class JSONAdminRequest
         {

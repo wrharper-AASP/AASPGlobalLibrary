@@ -44,6 +44,13 @@ namespace AASPGlobalLibrary
         public static string MSALMobileLoginAuth(string ClientId) { return "msal(" + ClientId + ")://auth"; }
         //WAM specific broker based, token cache will be required
         public static string WebBrokerMSAppxWebLoginAuth(string AppId) { return "ms-appx-web://Microsoft.AAD.BrokerPlugin/" + AppId; }
+        
+        //not really used yet...
+        //public static class NativeMethods
+        //{
+            //[DllImport("kernel32.dll")]
+            //public static extern IntPtr GetConsoleWindow();
+        //}
 
         #region MISC
         //creates a stream out of a string
