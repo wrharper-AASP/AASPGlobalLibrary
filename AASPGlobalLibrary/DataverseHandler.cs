@@ -688,7 +688,7 @@ namespace AASPGlobalLibrary
         {
             CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[3];
 
-            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumber, phoneIDDBName, 36);
+            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumberID, phoneIDDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataPicPath, phoneIDDBName, 200);
             createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataDisplayName, phoneIDDBName, 100);
 
