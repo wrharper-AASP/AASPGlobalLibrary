@@ -652,20 +652,19 @@ namespace AASPGlobalLibrary
         }
         async Task CreateWhatsAppDefaultColumns(ServiceClient service, string whatsAppDBName)
         {
-            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[5];
 
             createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, whatsAppDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, whatsAppDBName, 20);
             createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataMessage, whatsAppDBName, 4000);
             createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, whatsAppDBName, 20);
             createAttributeRequests[4] = CreateAttributeMetaData(DbInfo.metadataTimestamp, whatsAppDBName, 100);
-            createAttributeRequests[5] = CreateAttributeMetaData(DbInfo.metadataPicPath, whatsAppDBName, 100);
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
         async Task CreateSMSDefaultColumns(ServiceClient service, string smsDBName)
         {
-            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[5];
 
             createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, smsDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, smsDBName, 20);
@@ -677,21 +676,21 @@ namespace AASPGlobalLibrary
         }
         async Task CreatePhoneNumberDefaultColumns(ServiceClient service, string phoneDBName)
         {
-            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[3];
 
             createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumber, phoneDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataPicPath, phoneDBName, 200);
-            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataDisplayName, phoneDBName, 100);
+            createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataDisplayName, phoneDBName, 100);
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
         async Task CreatePhoneNumberIDDefaultColumns(ServiceClient service, string phoneIDDBName)
         {
-            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[3];
 
             createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumber, phoneIDDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataPicPath, phoneIDDBName, 200);
-            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataDisplayName, phoneIDDBName, 100);
+            createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataDisplayName, phoneIDDBName, 100);
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
