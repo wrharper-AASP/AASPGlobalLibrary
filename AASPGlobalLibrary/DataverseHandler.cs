@@ -619,12 +619,16 @@ namespace AASPGlobalLibrary
         }
         public async Task CreateDataverseDatabases(ServiceClient service, string[] databases)
         {
-            await CreateEntity(service, databases[0], "Accounts Database", "id", "Will be used for AAD unique identifiers.", 36);
+            await CreateEntity(service, databases[0], "Accounts Database", "id", "Not used", 1);
             await CreateAccountsDefaultColumns(service, databases[0]);
-            await CreateEntity(service, databases[1], "SMS Database", "id", "Will be used for AAD unique identifiers.", 36);
+            await CreateEntity(service, databases[1], "SMS Database", "id", "Not used", 1);
             await CreateSMSDefaultColumns(service, databases[1]);
-            await CreateEntity(service, databases[2], "WhatsApp Database", "id", "Will be used for AAD unique identifiers.", 36);
+            await CreateEntity(service, databases[2], "WhatsApp Database", "id", "Not used", 1);
             await CreateWhatsAppDefaultColumns(service, databases[2]);
+            await CreateEntity(service, databases[3], "Phone Numbers Database", "id", "Not used", 1);
+            await CreatePhoneNumberDefaultColumns(service, databases[3]);
+            await CreateEntity(service, databases[4], "Phone Number Ids Database", "id", "Not used", 1);
+            await CreatePhoneNumberIDDefaultColumns(service, databases[4]);
 
             Console.Write(Environment.NewLine + "Dataverse Deployment Finished");
         }
@@ -650,7 +654,7 @@ namespace AASPGlobalLibrary
         {
             CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
 
-            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, whatsAppDBName, 100);
+            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, whatsAppDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, whatsAppDBName, 20);
             createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataMessage, whatsAppDBName, 4000);
             createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, whatsAppDBName, 20);
@@ -663,12 +667,31 @@ namespace AASPGlobalLibrary
         {
             CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
 
-            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, smsDBName, 100);
+            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, smsDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, smsDBName, 20);
             createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataMessage, smsDBName, 4000);
             createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, smsDBName, 20);
             createAttributeRequests[4] = CreateAttributeMetaData(DbInfo.metadataTimestamp, smsDBName, 100);
-            createAttributeRequests[5] = CreateAttributeMetaData(DbInfo.metadataPicPath, smsDBName, 100);
+
+            await RunMutiplePushes(service, createAttributeRequests);
+        }
+        async Task CreatePhoneNumberDefaultColumns(ServiceClient service, string phoneDBName)
+        {
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
+
+            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumber, phoneDBName, 36);
+            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataPicPath, phoneDBName, 200);
+            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataDisplayName, phoneDBName, 100);
+
+            await RunMutiplePushes(service, createAttributeRequests);
+        }
+        async Task CreatePhoneNumberIDDefaultColumns(ServiceClient service, string phoneIDDBName)
+        {
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
+
+            createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataPhoneNumber, phoneIDDBName, 36);
+            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataPicPath, phoneIDDBName, 200);
+            createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataDisplayName, phoneIDDBName, 100);
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
@@ -764,6 +787,7 @@ namespace AASPGlobalLibrary
             public string? metadataPhoneNumber { get; set; }
             public string? metadataPhoneNumberID { get; set; }
             public string? metadataEmailAccount { get; set; }
+            public string? metadataDisplayName { get; set; }
         }
         class JSONGetSystemUsers
         {

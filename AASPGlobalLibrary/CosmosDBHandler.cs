@@ -22,12 +22,16 @@ namespace AASPGlobalLibrary
         PartitionKey whatsappParitionKey = new();
         PartitionKey accountsParitionKey = new();
         PartitionKey countersParitionKey = new();
+        PartitionKey phonenumberParitionKey = new();
+        PartitionKey phonenumberidParitionKey = new();
         public void SetParitionKeys()
         {
             smsParitionKey = new PartitionKey(DbInfo.smsIDName);
             whatsappParitionKey = new PartitionKey(DbInfo.whatsappIDName);
             accountsParitionKey = new PartitionKey(DbInfo.accountsIDName);
             countersParitionKey = new PartitionKey(DbInfo.countersIDName);
+            phonenumberParitionKey = new PartitionKey(DbInfo.phoneIDName);
+            phonenumberidParitionKey = new PartitionKey(DbInfo.whatsappphoneIDName);
         }
         //create layered messages? not possible in dataverse or many other SQL servers but it is in cosmosdb??
         //example: if from is same, add messages to same from group or to group
@@ -669,11 +673,15 @@ namespace AASPGlobalLibrary
             public string? whatsappIDName { get; set; }
             public string? accountsIDName { get; set; }
             public string? countersIDName { get; set; }
+            public string? phoneIDName { get; set; }
+            public string? whatsappphoneIDName { get; set; }
 
             public string? smsContainerName { get; set; }
             public string? whatsappContainerName { get; set; }
             public string? accountsContainerName { get; set; }
             public string? countersContainerName { get; set; }
+            public string? phoneContainerName { get; set; }
+            public string? whatsappphoneContainerName { get; set; }
         }
         class JSONSMSInfo
         {
@@ -706,6 +714,36 @@ namespace AASPGlobalLibrary
             public string? PicturePath { get; set; }
             public string? To { get; set; }
             public string? Timestamp { get; set; }
+
+            public override string ToString()
+            {
+                return JsonConvert.SerializeObject(this);
+            }
+        }
+        class JSONPhoneNumberInfo
+        {
+            [JsonProperty(PropertyName = "id")]
+            public string? Id { get; set; }
+            [JsonProperty(PropertyName = "pid")]
+            public string? PartitionKey { get; set; }
+            public string? PhoneNumber { get; set; }
+            public string? PicturePath { get; set; }
+            public string? DisplayName { get; set; }
+
+            public override string ToString()
+            {
+                return JsonConvert.SerializeObject(this);
+            }
+        }
+        class JSONPhoneNumberIDInfo
+        {
+            [JsonProperty(PropertyName = "id")]
+            public string? Id { get; set; }
+            [JsonProperty(PropertyName = "wpid")]
+            public string? PartitionKey { get; set; }
+            public string? PhoneNumber { get; set; }
+            public string? PicturePath { get; set; }
+            public string? DisplayName { get; set; }
 
             public override string ToString()
             {
