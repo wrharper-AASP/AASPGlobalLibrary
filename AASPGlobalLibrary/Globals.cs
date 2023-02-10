@@ -31,12 +31,22 @@ namespace AASPGlobalLibrary
         //Native OAuth2 used for .net desktop app specific processing
         public const string NativeLoginAuth = "https://login.microsoftonline.com/common/oauth2/nativeclient";
         //Interactive way to auth via localhost redirect
-        public static (string, string) LocalHostLoginAuth(string port = "")
+        public static string LocalHostLoginAuth(bool UseHttps, string port = "")
         {
-            if (port != "")
-                return ("http://localhost:" + port, "https://localhost:" + port);
+            if (UseHttps)
+            {
+                if (port != "")
+                    return "https://localhost:" + port;
+                else
+                    return "https://localhost";
+            }
             else
-                return ("http://localhost", "https://localhost");
+            {
+                if (port != "")
+                    return "http://localhost:" + port;
+                else
+                    return "http://localhost";
+            }
         }
         //You don't need to add a redirect URI if you're building a Xamarin Android and iOS application
         //that doesn't support the broker redirect URI.

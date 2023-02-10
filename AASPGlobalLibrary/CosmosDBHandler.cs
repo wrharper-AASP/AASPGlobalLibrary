@@ -375,7 +375,7 @@ namespace AASPGlobalLibrary
         }
         public static async Task<List<dynamic>> QuerySMSOrWhatsAppItemsAsync(Container container, string assigneduser)
         {
-            var sqlQueryText = "SELECT c.AssignedUser,c.To,c.Fromm,c.Message,c.PicturePath,c.Timestamp FROM c WHERE c.AssignedUser = \"" + assigneduser + "\"";
+            var sqlQueryText = "SELECT c.AssignedUser,c.To,c.Fromm,c.Message,c.Timestamp FROM c WHERE c.AssignedUser = \"" + assigneduser + "\"";
             sqlQueryText = sqlQueryText.Replace("\\", "");
 
             //log.LogInformation(Environment.NewLine + "Running query: " + sqlQueryText);
@@ -502,11 +502,23 @@ namespace AASPGlobalLibrary
         {
             return await CreateOrGetCurrentIdLightEncryptedBase64InternalAutoIncrement("WhatsAppCounter");
         }
+        async Task<string> IncreaseAccountIdCounter()
+        {
+            return await CreateOrGetCurrentIdLightEncryptedBase64InternalAutoIncrement("AccountsCounter");
+        }
+        async Task<string> IncreasePhoneNumberCounter()
+        {
+            return await CreateOrGetCurrentIdLightEncryptedBase64InternalAutoIncrement("PhoneNumberCounter");
+        }
+        async Task<string> IncreasePhoneNumberIdCounter()
+        {
+            return await CreateOrGetCurrentIdLightEncryptedBase64InternalAutoIncrement("PhoneNumberIDCounter");
+        }
         #endregion
 
         //Main area where Items are added to Cosmos
         #region Cosmos Adding Items
-        public async Task AddSMSItem(Container container, string AssignedUser, string From, string To, string Message, string Timestamp, string PicturesPath = "")
+        public async Task AddSMSItem(Container container, string AssignedUser, string From, string To, string Message, string Timestamp)
         {
             if (AssignedUser == "")
                 Console.Write(Environment.NewLine + "Assigned user cannot be empty.");
@@ -527,14 +539,13 @@ namespace AASPGlobalLibrary
                     Fromm = From,
                     To = To,
                     Message = Message,
-                    Timestamp = Timestamp,
-                    PicturePath = PicturesPath
+                    Timestamp = Timestamp
                 };
                 jsonInfo.Id = jsonInfo.PartitionKey + "." + await IncreaseSMSIdCounter();
                 await CreateOrGetItemInContainerAsync(jsonInfo, container);
             }
         }
-        public async Task AddWhatsAppItem(Container container, string AssignedUser, string From, string To, string Message, string Timestamp, string PicturesPath = "")
+        public async Task AddWhatsAppItem(Container container, string AssignedUser, string From, string To, string Message, string Timestamp)
         {
             if (AssignedUser == "")
                 Console.Write(Environment.NewLine + "Assigned user cannot be empty.");
@@ -555,8 +566,7 @@ namespace AASPGlobalLibrary
                     Fromm = From,
                     To = To,
                     Message = Message,
-                    Timestamp = Timestamp,
-                    PicturePath = PicturesPath
+                    Timestamp = Timestamp
                 };
                 jsonInfo.Id = jsonInfo.PartitionKey + "." + await IncreaseWhatsAppIdCounter();
 
@@ -600,13 +610,13 @@ namespace AASPGlobalLibrary
             }
         }
 
-        public async Task AddSMSItem(string AssignedUser, string From, string To, string Message, string Timestamp, string PicturesPath = "")
+        public async Task AddSMSItem(string AssignedUser, string From, string To, string Message, string Timestamp)
         {
-            await AddSMSItem(await CreateOrGetContainerAsync(DbInfo.smsIDName, DbInfo.smsContainerName), AssignedUser, From, To, Message, Timestamp, PicturesPath);
+            await AddSMSItem(await CreateOrGetContainerAsync(DbInfo.smsIDName, DbInfo.smsContainerName), AssignedUser, From, To, Message, Timestamp);
         }
-        public async Task AddWhatsAppItem(string AssignedUser, string From, string To, string Message, string Timestamp, string PicturesPath = "")
+        public async Task AddWhatsAppItem(string AssignedUser, string From, string To, string Message, string Timestamp)
         {
-            await AddWhatsAppItem(await CreateOrGetContainerAsync(DbInfo.whatsappIDName, DbInfo.whatsappContainerName), AssignedUser, From, To, Message, Timestamp, PicturesPath);
+            await AddWhatsAppItem(await CreateOrGetContainerAsync(DbInfo.whatsappIDName, DbInfo.whatsappContainerName), AssignedUser, From, To, Message, Timestamp);
         }
         public async Task AddOrUpdateAccountItem(string AssignedTo, string PhoneNumber, string PhoneNumberID)
         {
@@ -693,7 +703,6 @@ namespace AASPGlobalLibrary
             //public From? From { get; set; }
             public string? Fromm { get; set; }
             public string? Message { get; set; }
-            public string? PicturePath { get; set; }
             public string? To { get; set; }
             public string? Timestamp { get; set; }
 
@@ -711,7 +720,6 @@ namespace AASPGlobalLibrary
             public string? AssignedUser { get; set; }
             public string? Fromm { get; set; }
             public string? Message { get; set; }
-            public string? PicturePath { get; set; }
             public string? To { get; set; }
             public string? Timestamp { get; set; }
 
@@ -741,7 +749,7 @@ namespace AASPGlobalLibrary
             public string? Id { get; set; }
             [JsonProperty(PropertyName = "wpid")]
             public string? PartitionKey { get; set; }
-            public string? PhoneNumber { get; set; }
+            public string? PhoneNumberID { get; set; }
             public string? PicturePath { get; set; }
             public string? DisplayName { get; set; }
 
@@ -785,7 +793,6 @@ namespace AASPGlobalLibrary
             public string? fromm { get; set; }
             public string? to { get; set; }
             public string? message { get; set; }
-            public string? picturepath { get; set; }
             public string? assignedto { get; set; }
             public string? phonenumber { get; set; }
             public string? phonenumberid { get; set; }

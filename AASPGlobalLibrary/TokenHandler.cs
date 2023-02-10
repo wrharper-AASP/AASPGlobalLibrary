@@ -14,81 +14,102 @@ namespace AASPGlobalLibrary
     {
         public static TokenCredential? tokenCredential;
         public static TokenCredential? managedTokenCredential;
-        static IConfidentialClientApplication? app;
-        static IPublicClientApplication? publicapp;
 
         #region Client Handling
+        class UsePublicClientTokenHandler
+        {
+            DateTime lasttime = DateTime.Now;
+            string lasttoken = "";
+            IPublicClientApplication? publicapp;
+
+            internal async Task<string> GetToken(string tenantId, string clientId, string[] scopes, bool UseHttps)
+            {
+                if (DateTime.Now <= lasttime)
+                {
+                    publicapp ??= PublicClientApplicationBuilder.Create(clientId)
+                            .WithTenantId(tenantId)
+                            .WithRedirectUri(Globals.LocalHostLoginAuth(UseHttps))
+                            .Build();
+
+                    var accounts = await publicapp.GetAccountsAsync();
+                    AuthenticationResult result;
+                    try
+                    {
+                        result = await publicapp.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
+                                    .ExecuteAsync();
+                    }
+                    catch (MsalUiRequiredException)
+                    {
+                        result = await publicapp.AcquireTokenInteractive(scopes)
+                                    .ExecuteAsync();
+                    }
+                    lasttoken = result.AccessToken;
+                    lasttime = result.ExpiresOn.DateTime;
+                }
+                return lasttoken;
+            }
+        }
+        static readonly UsePublicClientTokenHandler UsePublicClientToken = new();
         public static async Task<string> GetPublicClientAccessToken(string clientId, string[] scopes, string tenantId, bool UseHttps=false)
         {
-            (string redirect2, string redirect) = Globals.LocalHostLoginAuth();
-            if (!UseHttps)
-            {
-                publicapp ??= PublicClientApplicationBuilder.Create(clientId)
-                        .WithTenantId(tenantId)
-                        .WithRedirectUri(redirect2)
-                        .Build();
-            }
-            else
-            {
-                publicapp ??= PublicClientApplicationBuilder.Create(clientId)
-                        .WithTenantId(tenantId)
-                        .WithRedirectUri(redirect)
-                        .Build();
-            }
-
-            var accounts = await publicapp.GetAccountsAsync();
-            AuthenticationResult result;
-            try
-            {
-                result = await publicapp.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
-                            .ExecuteAsync();
-            }
-            catch (MsalUiRequiredException)
-            {
-                result = await publicapp.AcquireTokenInteractive(scopes)
-                            .ExecuteAsync();
-            }
-            return result.AccessToken;
+            return await UsePublicClientToken.GetToken(tenantId, clientId, scopes, UseHttps);
         }
+
+        class UseConfidentialClientTokenHandler
+        {
+            DateTime lasttime = DateTime.Now;
+            string lasttoken = "";
+            IConfidentialClientApplication? app;
+
+            internal async Task<string> GetToken(string tenantId, string clientId, string[] scopes, string secret)
+            {
+
+                if (DateTime.Now <= lasttime)
+                {
+                    if (app == null)
+                    {
+                        try
+                        {
+                            var storageProperties =
+                             new StorageCreationPropertiesBuilder("TokenCache", Environment.CurrentDirectory + "/TokenCache")
+                                .Build();
+
+                            app = ConfidentialClientApplicationBuilder.Create(clientId)
+                                            .WithClientSecret(secret)
+                                            .WithTenantId(tenantId)
+                                            .WithRedirectUri(Globals.LocalHostLoginAuth(true))
+                                            .WithLegacyCacheCompatibility(false)
+                                            .Build();
+
+                            MsalCacheHelper cacheHelper = await MsalCacheHelper.CreateAsync(storageProperties);
+                            cacheHelper.RegisterCache(app.UserTokenCache);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Write(Environment.NewLine + "MSAL Failed, reverting to legacy ADAL: " + ex.Message);
+
+                            app = ConfidentialClientApplicationBuilder.Create(clientId)
+                                .WithClientSecret(secret)
+                                .WithTenantId(tenantId)
+                                .WithRedirectUri(Globals.LocalHostLoginAuth(true))
+                                .WithLegacyCacheCompatibility(true)
+                                .Build();
+                        }
+                    }
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(scopes).ExecuteAsync();
+                    lasttoken = result.AccessToken;
+                    lasttime = result.ExpiresOn.DateTime;
+                }
+                return lasttoken;
+            }
+        }
+        static readonly UseConfidentialClientTokenHandler UseConfidentialClientToken = new();
         public static async Task<string> GetConfidentialClientAccessToken(string clientId, string secret, string[] scopes, string tenantId)
         {
-            if (app == null)
-            {
-                try
-                {
-                    (_, string redirect) = Globals.LocalHostLoginAuth();
-                    var storageProperties =
-                     new StorageCreationPropertiesBuilder("TokenCache", Environment.CurrentDirectory + "/TokenCache")
-                        .Build();
-
-                    app = ConfidentialClientApplicationBuilder.Create(clientId)
-                        .WithClientSecret(secret)
-                        .WithTenantId(tenantId)
-                        .WithRedirectUri(redirect)
-                        .WithLegacyCacheCompatibility(false)
-                        .Build();
-
-                    var cacheHelper = await MsalCacheHelper.CreateAsync(storageProperties);
-                    cacheHelper.RegisterCache(app.UserTokenCache);
-                }
-                catch(Exception ex)
-                {
-                    Console.Write(Environment.NewLine + "MSAL Failed, reverting to legacy ADAL: " + ex.Message);
-
-                    (_, string redirect) = Globals.LocalHostLoginAuth();
-                    app = ConfidentialClientApplicationBuilder.Create(clientId)
-                        .WithClientSecret(secret)
-                        .WithTenantId(tenantId)
-                        .WithRedirectUri(redirect)
-                        .WithLegacyCacheCompatibility(true)
-                        .Build();
-                }
-            }
-
-            string result = (await app.AcquireTokenForClient(scopes).ExecuteAsync()).AccessToken;
-
-            return result; 
+            return await UseConfidentialClientToken.GetToken(tenantId, clientId, scopes, secret);
         }
+
         public static ArmClient CreateArmClient()
         {
             tokenCredential ??= new InteractiveBrowserCredential();
@@ -192,6 +213,51 @@ namespace AASPGlobalLibrary
         #endregion
 
         #region Token Handling
+        class UseUserDelegatedTokenHandler
+        {
+            DateTime lasttime = DateTime.Now;
+            string lasttoken = "";
+            public async Task<string> GetToken(TokenCredential _tokenCredential, string[] scopes)
+            {
+                if (DateTime.Now <= lasttime)
+                {
+                    AccessToken _Local = await _tokenCredential.GetTokenAsync(new TokenRequestContext(scopes), new CancellationToken());
+                    lasttime = _Local.ExpiresOn.DateTime;
+                    lasttoken = _Local.Token;
+                }
+                return lasttoken;
+            }
+        }
+        class UseOAuthDirectTokenHandler
+        {
+            DateTime lasttime = DateTime.Now;
+            string lasttoken = "";
+
+            public async Task<string> GetToken(string tenantid, string clientid, string clientsecret, string scope)
+            {
+                if (DateTime.Now <= lasttime)
+                {
+                    using HttpClient client = new();
+                    var data = new[]
+                    {
+                            new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                            new KeyValuePair<string, string>("client_id", clientid),
+                            new KeyValuePair<string, string>("scope", scope),
+                            new KeyValuePair<string, string>("client_secret", clientsecret),
+                        };
+                    var formurl = new FormUrlEncodedContent(data);
+                    HttpResponseMessage response = await client.PostAsync("https://login.microsoftonline.com/" + tenantid + "/oauth2/v2.0/token", formurl);
+                    JSONOAuthToken oauth = JsonSerializer.Deserialize<JSONOAuthToken>(await response.Content.ReadAsStringAsync());
+                    lasttime = DateTime.Parse(oauth.expires_in.ToString());
+                    if (oauth.access_token != null)
+                        lasttoken = oauth.access_token;
+                }
+                return lasttoken;
+            }
+        }
+        static readonly UseUserDelegatedTokenHandler UseUserDelegatedToken = new();
+        static readonly UseOAuthDirectTokenHandler UseOAuthDirectToken = new();
+
         class JSONOAuthToken
         {
             public string? token_type { get; set; }
@@ -201,72 +267,59 @@ namespace AASPGlobalLibrary
         }
         public static async Task<string> GetOAuthDirectToken(string tenantid, string clientid, string clientsecret, string scope)
         {
-            using (HttpClient client = new())
-            {
-                var data = new[]
-                {
-                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                    new KeyValuePair<string, string>("client_id", clientid),
-                    new KeyValuePair<string, string>("scope", scope),
-                    new KeyValuePair<string, string>("client_secret", clientsecret),
-                };
-                var formurl = new FormUrlEncodedContent(data);
-                HttpResponseMessage response = await client.PostAsync("https://login.microsoftonline.com/" + tenantid + "/oauth2/v2.0/token", formurl);
-                JSONOAuthToken oauth = JsonSerializer.Deserialize<JSONOAuthToken>(await response.Content.ReadAsStringAsync());
-                return oauth.access_token;
-            }
+            return await UseOAuthDirectToken.GetToken(tenantid, clientid, clientsecret, scope);
         }
 
         public static async Task<string> GetCustomToken(TokenCredential tokenC, string[] scope)
         {
-            return (await tokenC.GetTokenAsync(new TokenRequestContext(scope), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(tokenC, scope);
         }
         public static async Task<string> GetDefaultGraphToken(TokenCredential tokenC)
         {
-            return (await tokenC.GetTokenAsync(new TokenRequestContext(new string[] { "https://graph.microsoft.com/.default" }), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(tokenC, new[] { "https://graph.microsoft.com/.default" });
         }
         public static async Task<string> GetKeyVaultImpersonationToken(TokenCredential tokenC)
         {
-            return (await tokenC.GetTokenAsync(new TokenRequestContext(new string[] { "https://vault.azure.net/user_impersonation" }), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(tokenC, new[] { "https://vault.azure.net/user_impersonation" });
         }
         public static async Task<string> GetDynamicsImpersonationToken(TokenCredential tokenC, string environmentName)
         {
-            return (await tokenC.GetTokenAsync(new TokenRequestContext(new string[] { environmentName + "/user_impersonation" }), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(tokenC, new[] { environmentName + "/user_impersonation" });
         }
         public static async Task<string> GetGlobalDynamicsImpersonationToken(TokenCredential tokenC)
         {
-            return (await tokenC.GetTokenAsync(new TokenRequestContext(new string[] { "https://globaldisco.crm.dynamics.com/user_impersonation" }), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(tokenC, new[] { "https://globaldisco.crm.dynamics.com/user_impersonation" });
         }
 
         public static async Task<string> GetCustomToken(string[] scope)
         {
             tokenCredential ??= new InteractiveBrowserCredential();
-            return (await tokenCredential.GetTokenAsync(new TokenRequestContext(scope), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(tokenCredential, scope);
         }
         public static async Task<string> GetCustomManagedToken(string[] scope)
         {
             managedTokenCredential ??= new ManagedIdentityCredential();
-            return (await managedTokenCredential.GetTokenAsync(new TokenRequestContext(scope), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(managedTokenCredential, scope);
         }
         public static async Task<string> GetDefaultGraphToken()
         {
             tokenCredential ??= new InteractiveBrowserCredential();
-            return (await tokenCredential.GetTokenAsync(new TokenRequestContext(new string[] { "https://graph.microsoft.com/.default" }), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(tokenCredential, new[] { "https://graph.microsoft.com/.default" });
         }
         public static async Task<string> GetKeyVaultImpersonationToken()
         {
             tokenCredential ??= new InteractiveBrowserCredential();
-            return (await tokenCredential.GetTokenAsync(new TokenRequestContext(new string[] { "https://vault.azure.net/user_impersonation" }), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(tokenCredential, new[] { "https://vault.azure.net/user_impersonation" });
         }
         public static async Task<string> GetDynamicsImpersonationToken(string environmentName)
         {
             tokenCredential ??= new InteractiveBrowserCredential();
-            return (await tokenCredential.GetTokenAsync(new TokenRequestContext(new string[] { environmentName + "/user_impersonation" }), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(tokenCredential, new[] { environmentName + "/user_impersonation" });
         }
         public static async Task<string> GetGlobalDynamicsImpersonationToken()
         {
             tokenCredential ??= new InteractiveBrowserCredential();
-            return (await tokenCredential.GetTokenAsync(new TokenRequestContext(new string[] { "https://globaldisco.crm.dynamics.com/user_impersonation" }), new CancellationToken())).Token;
+            return await UseUserDelegatedToken.GetToken(tokenCredential, new[] { "https://globaldisco.crm.dynamics.com/user_impersonation" });
         }
         #endregion
 

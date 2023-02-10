@@ -5,18 +5,30 @@
 //For those who need app registration
 namespace AASPGlobalLibrary
 {
-    //CRITICAL ERROS WILL OCCUR: web redirect has been disabled. it was creating connection errors to dataverse.
+    class APIPermissionIds
+    {
+        //A_ means application consent, D_ means delegated consent
+
+        public const string GraphAppId = "00000003-0000-0000-c000-000000000000";
+        //Allows users to sign-in to the app, and allows the app to read the profile of signed-in users.
+        //It also allows the app to read basic company information of signed-in users.
+        public const string D_GraphUserReadId = "e1fe6dd8-ba31-4d61-89e7-88639da4683d";
+        //Allows the app to send mail as users in the organization.
+        public const string D_GraphMailSendId = "e383f46e-2787-4529-855e-0e479a3ffac0";
+        //Allows the app to send mail as any user without a signed-in user.
+        public const string A_GraphMailSendId = "b633e1c5-b582-4048-a93e-9f11b44c7e96";
+        //Allows the app to send mail as the signed-in user, including sending on-behalf of others.
+        public const string D_GraphMailSharedSendId = "a367ab51-6b49-43bf-a716-a1fb06d2a174";
+
+        public const string DynamicsAppId = "00000007-0000-0000-c000-000000000000";
+        //Allows access to Dynamics 365 APIs as the signed-in user.
+        public const string D_DynamicsUserImpersonationId = "78ce3f0f-a1ce-49c2-8cde-64b5c0896db4";
+    }
+    //CRITICAL ERRORS WILL OCCUR: web redirect has been disabled. it was creating connection errors to dataverse.
     public class CreateAzureAPIHandler
     {
         const string signInAudience = "AzureADandPersonalMicrosoftAccount";
         const string noSDKSupport = "NoLiveSdkSupport";
-
-        const string graphAppId = "00000003-0000-0000-c000-000000000000";
-        const string graphUserReadId = "e1fe6dd8-ba31-4d61-89e7-88639da4683d";
-        const string graphMailSendId = "e383f46e-2787-4529-855e-0e479a3ffac0";
-
-        const string dynamicsAppId = "00000007-0000-0000-c000-000000000000";
-        const string dynamicsUserImpersonationId = "78ce3f0f-a1ce-49c2-8cde-64b5c0896db4";
 
         public static async Task<string> AddSecretClientPasswordAsync(GraphServiceClient gs, string appObjectId, string appid, string secretDisplayName, bool infiniteloop = true)
         {
@@ -151,6 +163,15 @@ namespace AASPGlobalLibrary
 
         #region Binded JSONS
         //haven't made dynamic yet
+        class JSONOAuth2PermissionGrants
+        {
+            public string? clientid { get; set; }
+            public string? consentType { get; set; }
+            //leave null if consent type = AllPrincipals instead of Principal
+            public string? principalId { get; set; }
+            public string? resourceId { get; set; }
+            public string? scope { get; set; }
+        }
         class JSONAutoCreateDataverseAPI
         {
             public string? displayName { get; set; }
@@ -180,17 +201,17 @@ namespace AASPGlobalLibrary
                 //Microsoft Graph
                 requiredResourceAccess[0] = new()
                 {
-                    resourceAppId = graphAppId,
+                    resourceAppId = APIPermissionIds.GraphAppId,
                     resourceAccess = new Resourceaccess[2]
                     {
                         new()
                         {
-                            id = graphUserReadId,
+                            id = APIPermissionIds.D_GraphUserReadId,
                             type = type
                         },
                         new()
                         {
-                            id = graphMailSendId,
+                            id = APIPermissionIds.A_GraphMailSendId,
                             type = type
                         }
                     }
@@ -199,12 +220,12 @@ namespace AASPGlobalLibrary
                 //Dynamics CRM
                 requiredResourceAccess[1] = new()
                 {
-                    resourceAppId = dynamicsAppId,
+                    resourceAppId = APIPermissionIds.DynamicsAppId,
                     resourceAccess = new Resourceaccess[1]
                     {
                         new()
                         {
-                            id = dynamicsUserImpersonationId,
+                            id = APIPermissionIds.D_DynamicsUserImpersonationId,
                             type = type
                         }
                     }

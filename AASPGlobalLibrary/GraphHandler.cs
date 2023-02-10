@@ -11,7 +11,7 @@ namespace AASPGlobalLibrary
         //uses a provider to bypass needing an API
         public static GraphServiceClient GetServiceClientWithoutAPI()
         {
-            var authProvider = new DelegateAuthenticationProvider(authenticateRequestAsyncDelegate: async (request) =>
+            DelegateAuthenticationProvider authProvider = new(authenticateRequestAsyncDelegate: async (request) =>
             {
                 // Use Microsoft.Identity.Client to retrieve token
                 //var result = auth;
