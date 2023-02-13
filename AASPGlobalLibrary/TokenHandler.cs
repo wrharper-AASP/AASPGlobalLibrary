@@ -24,7 +24,7 @@ namespace AASPGlobalLibrary
 
             internal async Task<string> GetToken(string tenantId, string clientId, string[] scopes, bool UseHttps)
             {
-                if (DateTime.Now <= lasttime)
+                if (DateTime.Now >= lasttime)
                 {
                     publicapp ??= PublicClientApplicationBuilder.Create(clientId)
                             .WithTenantId(tenantId)
@@ -64,7 +64,7 @@ namespace AASPGlobalLibrary
             internal async Task<string> GetToken(string tenantId, string clientId, string[] scopes, string secret)
             {
 
-                if (DateTime.Now <= lasttime)
+                if (DateTime.Now >= lasttime)
                 {
                     if (app == null)
                     {
@@ -219,7 +219,7 @@ namespace AASPGlobalLibrary
             string lasttoken = "";
             public async Task<string> GetToken(TokenCredential _tokenCredential, string[] scopes)
             {
-                if (DateTime.Now <= lasttime)
+                if (DateTime.Now >= lasttime)
                 {
                     AccessToken _Local = await _tokenCredential.GetTokenAsync(new TokenRequestContext(scopes), new CancellationToken());
                     lasttime = _Local.ExpiresOn.DateTime;
@@ -235,7 +235,7 @@ namespace AASPGlobalLibrary
 
             public async Task<string> GetToken(string tenantid, string clientid, string clientsecret, string scope)
             {
-                if (DateTime.Now <= lasttime)
+                if (DateTime.Now >= lasttime)
                 {
                     using HttpClient client = new();
                     var data = new[]
