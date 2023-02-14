@@ -20,18 +20,18 @@ namespace AASPGlobalLibrary
         public JSONInternalDbInfo? DbInfo { get; set; }
         PartitionKey smsParitionKey = new();
         PartitionKey whatsappParitionKey = new();
-        PartitionKey accountsParitionKey = new();
-        PartitionKey countersParitionKey = new();
-        PartitionKey phonenumberParitionKey = new();
-        PartitionKey phonenumberidParitionKey = new();
+        //PartitionKey accountsParitionKey = new();
+        //PartitionKey countersParitionKey = new();
+        //PartitionKey phonenumberParitionKey = new();
+        //PartitionKey phonenumberidParitionKey = new();
         public void SetParitionKeys()
         {
             smsParitionKey = new PartitionKey(DbInfo.smsIDName);
             whatsappParitionKey = new PartitionKey(DbInfo.whatsappIDName);
-            accountsParitionKey = new PartitionKey(DbInfo.accountsIDName);
-            countersParitionKey = new PartitionKey(DbInfo.countersIDName);
-            phonenumberParitionKey = new PartitionKey(DbInfo.phoneIDName);
-            phonenumberidParitionKey = new PartitionKey(DbInfo.whatsappphoneIDName);
+            //accountsParitionKey = new PartitionKey(DbInfo.accountsIDName);
+            //countersParitionKey = new PartitionKey(DbInfo.countersIDName);
+            //phonenumberParitionKey = new PartitionKey(DbInfo.phoneIDName);
+            //phonenumberidParitionKey = new PartitionKey(DbInfo.whatsappphoneIDName);
         }
         //create layered messages? not possible in dataverse or many other SQL servers but it is in cosmosdb??
         //example: if from is same, add messages to same from group or to group
@@ -53,7 +53,7 @@ namespace AASPGlobalLibrary
         #region Admin Specific
         public static async Task<string> UpdateSMSAndWhatsAppAssignedUser(string cosmosRestSite, string oldname, string assignedTo)
         {
-            var request = new JSONAdminRequest()
+            var request = new JSONAdminAccountRequest()
             {
                 token = await TokenHandler.GetKeyVaultImpersonationToken(),
                 type = "7",
@@ -64,7 +64,8 @@ namespace AASPGlobalLibrary
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
             return await responsem.Content.ReadAsStringAsync();
         }
-        public static async Task<List<JSONAdminResponse>> GetAllAccounts(string cosmosRestSite)
+
+        public static async Task<List<JSONAdminAccountResponse>> GetAllAccounts(string cosmosRestSite)
         {
             var request = new JSONGetRequest()
             {
@@ -74,7 +75,7 @@ namespace AASPGlobalLibrary
             using HttpClient client = new();
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
             string response = await responsem.Content.ReadAsStringAsync();
-            List<JSONAdminResponse> adminResponses = new();
+            List<JSONAdminAccountResponse> adminResponses = new();
             try
             {
                 dynamic dynamicResponse = Globals.DynamicJsonDeserializer(response);
@@ -82,18 +83,18 @@ namespace AASPGlobalLibrary
                 {
                     string s_item = dynamicItem.ToString();
                     dynamic d2 = Globals.DynamicJsonDeserializer(s_item);
-                    adminResponses.Add(new JSONAdminResponse() { AssignedTo = d2.AssignedTo, PhoneNumber = d2.PhoneNumber, PhoneNumberID = d2.PhoneNumberID, RoleID = d2.RoleID });
+                    adminResponses.Add(new JSONAdminAccountResponse() { AssignedTo = d2.AssignedTo, PhoneNumber = d2.PhoneNumber, PhoneNumberID = d2.PhoneNumberID, RoleID = d2.RoleID });
                 }
             }
             catch
             {
-                adminResponses.Add(new JSONAdminResponse() { AssignedTo = response });
+                adminResponses.Add(new JSONAdminAccountResponse() { AssignedTo = response });
             }
             return adminResponses;
         }
         public static async Task<string> AddOrUpdateAccount(string cosmosRestSite, string oldname, string assignedto, string phonenumber, string phonenumberid, string roleid)
         {
-            var request = new JSONAdminRequest()
+            var request = new JSONAdminAccountRequest()
             {
                 token = await TokenHandler.GetKeyVaultImpersonationToken(),
                 type = "5",
@@ -109,11 +110,95 @@ namespace AASPGlobalLibrary
         }
         public static async Task<string> DeleteAccount(string cosmosRestSite, string assignedto)
         {
-            var request = new JSONAdminRequest()
+            var request = new JSONAdminAccountRequest()
             {
                 token = await TokenHandler.GetKeyVaultImpersonationToken(),
                 type = "6",
                 assignedto = assignedto,
+            };
+            using HttpClient client = new();
+            HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
+            return await responsem.Content.ReadAsStringAsync();
+        }
+
+        public static async Task<List<JSONAdminProfileResponse>> GetFilteredProfile(string cosmosRestSite, string phonenumber)
+        {
+            var request = new JSONAdminProfileRequest()
+            {
+                token = await TokenHandler.GetKeyVaultImpersonationToken(),
+                type = "10",
+                phonenumber = phonenumber
+            };
+            using HttpClient client = new();
+            HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
+            string response = await responsem.Content.ReadAsStringAsync();
+            List<JSONAdminProfileResponse> adminResponses = new();
+            try
+            {
+                dynamic dynamicResponse = Globals.DynamicJsonDeserializer(response);
+                foreach (var dynamicItem in dynamicResponse.EnumerateArray())
+                {
+                    string s_item = dynamicItem.ToString();
+                    dynamic d2 = Globals.DynamicJsonDeserializer(s_item);
+                    adminResponses.Add(new JSONAdminProfileResponse() { PhoneNumber = d2.PhoneNumber, PicturePath = d2.PicturePath, DisplayName = d2.DisplayName });
+                }
+            }
+            catch
+            {
+                adminResponses.Add(new JSONAdminProfileResponse() { PhoneNumber = response });
+            }
+            return adminResponses;
+        }
+        public static async Task<List<JSONAdminProfileResponse>> GetAllProfiles(string cosmosRestSite)
+        {
+            var request = new JSONGetRequest()
+            {
+                token = await TokenHandler.GetKeyVaultImpersonationToken(),
+                type = "7"
+            };
+            using HttpClient client = new();
+            HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
+            string response = await responsem.Content.ReadAsStringAsync();
+            List<JSONAdminProfileResponse> adminResponses = new();
+            try
+            {
+                dynamic dynamicResponse = Globals.DynamicJsonDeserializer(response);
+                foreach (var dynamicItem in dynamicResponse.EnumerateArray())
+                {
+                    string s_item = dynamicItem.ToString();
+                    dynamic d2 = Globals.DynamicJsonDeserializer(s_item);
+                    adminResponses.Add(new JSONAdminProfileResponse() { PhoneNumber = d2.PhoneNumber, PicturePath = d2.PicturePath, DisplayName = d2.DisplayName });
+                }
+            }
+            catch
+            {
+                adminResponses.Add(new JSONAdminProfileResponse() { PhoneNumber = response });
+            }
+            return adminResponses;
+        }
+        public static async Task<string> UpdateProfile(string cosmosRestSite, string phonenumber, string picturepath, string displayname)
+        {
+            var request = new JSONAdminProfileRequest()
+            {
+                token = await TokenHandler.GetKeyVaultImpersonationToken(),
+                type = "8",
+                phonenumber = phonenumber,
+                picturepath = picturepath,
+                displayname = displayname
+            };
+            using HttpClient client = new();
+            HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
+            return await responsem.Content.ReadAsStringAsync();
+        }
+        public static async Task<string> AddProfile(string cosmosRestSite, string phonenumber, string picturepath, string displayname)
+        {
+            var request = new JSONAdminProfileRequest()
+            {
+                token = await TokenHandler.GetKeyVaultImpersonationToken(),
+                type = "9",
+                phonenumber = phonenumber,
+                picturepath = picturepath,
+                displayname = displayname
             };
             using HttpClient client = new();
             HttpResponseMessage responsem = await client.PostAsJsonAsync(cosmosRestSite, request);
@@ -786,7 +871,7 @@ namespace AASPGlobalLibrary
             public string? token { get; set; }
             public string? type { get; set; }
         }
-        class JSONAdminRequest
+        class JSONAdminAccountRequest
         {
             public string? token { get; set; }
             public string? type { get; set; }
@@ -799,12 +884,26 @@ namespace AASPGlobalLibrary
             public string? roleid { get; set; }
             public string? oldname { get; set; }
         }
-        public class JSONAdminResponse
+        class JSONAdminProfileRequest
+        {
+            public string? token { get; set; }
+            public string? type { get; set; }
+            public string? phonenumber { get; set; }
+            public string? picturepath { get; set; }
+            public string? displayname { get; set; }
+        }
+        public class JSONAdminAccountResponse
         {
             public string? AssignedTo { get; set; }
             public string? PhoneNumber { get; set; }
             public string? PhoneNumberID { get; set; }
             public string? RoleID { get; set; }
+        }
+        public class JSONAdminProfileResponse
+        {
+            public string? PhoneNumber { get; set; }
+            public string? PicturePath { get; set; }
+            public string? DisplayName { get; set; }
         }
         #endregion
     }
