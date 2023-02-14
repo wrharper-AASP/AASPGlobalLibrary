@@ -248,7 +248,10 @@ namespace AASPGlobalLibrary
             {
                 if (o.Key == key)
                 {
-                    return o.Value.ToString();
+                    if (o.Value == null)
+                        return "";
+                    else
+                        return o.Value.ToString();
                 }
             }
             return "";
@@ -260,7 +263,10 @@ namespace AASPGlobalLibrary
             {
                 if (o.Key == key)
                 {
-                    return o.Value.ToString();
+                    if (o.Value == null)
+                        return "";
+                    else
+                        return o.Value.ToString();
                 }
             }
             return "";
@@ -271,7 +277,10 @@ namespace AASPGlobalLibrary
             {
                 if (o.Key == key)
                 {
-                    return o.Value.ToString();
+                    if (o.Value == null)
+                        return "";
+                    else
+                        return o.Value.ToString();
                 }
             }
             return "";
