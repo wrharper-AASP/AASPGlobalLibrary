@@ -647,9 +647,35 @@ namespace AASPGlobalLibrary
                 return "";
         }
 
+        class JSONPOSTSystemUser
+        {
+            public int accessmode { get; set; }
+            public string? applicationid { get; set; }
+            public string? defaultodbfoldername { get; set; }
+            public string? businessunitid { get; set; }
+        }
         public async Task<HttpResponseMessage> CreateSystemUser(string appRegistrationClientId, int accessMode = 4)
         {
+
+            /* Access Modes
+            0	Read-Write
+            1	Administrative
+            2	Read
+            3	Support User
+            4	Non-interactive
+            5	Delegated Admin */
+
             string businessID = await GetBusinessID(baseUrl);
+            JSONPOSTSystemUser systemUser = new()
+            {
+                accessmode = accessMode,
+                applicationid = appRegistrationClientId,
+                defaultodbfoldername = "Dynamics365",
+                businessunitid = "/businessunits(" + businessID + ")"
+            };
+
+            string json = JsonSerializer.Serialize(systemUser);
+            json = json.Replace("businessunitid", "businessunitid@odata.bind");
 
             using HttpClient client = new();
             // See https://learn.microsoft.com/powerapps/developer/data-platform/webapi/compose-http-requests-handle-errors#web-api-url-and-versions
@@ -668,23 +694,15 @@ namespace AASPGlobalLibrary
             // See https://learn.microsoft.com/powerapps/developer/data-platform/webapi/compose-http-requests-handle-errors
             // See https://learn.microsoft.com/powerapps/developer/data-platform/webapi/use-web-api-functions#unbound-functions
             //HttpResponseMessage response = await client.GetAsync(filter);
-            Newtonsoft.Json.Linq.JObject newAppUser = new()
+            /*Newtonsoft.Json.Linq.JObject newAppUser = new()
                 { 
-
-                /* Access Modes
-                0	Read-Write
-                1	Administrative
-                2	Read
-                3	Support User
-                4	Non-interactive
-                5	Delegated Admin */
                     "accessmode", accessMode,
                     "businessunitid@odata.bind", "/businessunits(" + businessID + ")",
                     "applicationid", appRegistrationClientId,
                     "defaultodbfoldername", "Dynamics365"
-                };
+                };*/
             //Console.Write(newAppUser.ToString());
-            var response = await client.PostAsJsonAsync(baseUrl + DbInfo.api + "systemusers", newAppUser.ToString());
+            var response = await client.PostAsJsonAsync(baseUrl + DbInfo.api + "systemusers", json);
 
             return response;
         }
@@ -714,7 +732,6 @@ namespace AASPGlobalLibrary
                         {
                             //silent skip because this will be called after trying again most likely.
                             //Console.Write(Environment.NewLine + "Skipping: System account already exists for " + appClientId);
-                            //finished = true;
                         }
                         else
                             Console.Write(Environment.NewLine + content);

@@ -24,7 +24,7 @@ namespace AASPGlobalLibrary
 
             internal async Task<string> GetToken(string tenantId, string clientId, string[] scopes, bool UseHttps)
             {
-                if (DateTime.Now >= lasttime)
+                if (DateTime.Now >= lasttime || JwtGetUsersInfo.IsNewAudience(lasttoken, scopes))
                 {
                     publicapp ??= PublicClientApplicationBuilder.Create(clientId)
                             .WithTenantId(tenantId)
@@ -64,7 +64,7 @@ namespace AASPGlobalLibrary
             internal async Task<string> GetToken(string tenantId, string clientId, string[] scopes, string secret)
             {
 
-                if (DateTime.Now >= lasttime)
+                if (DateTime.Now >= lasttime || JwtGetUsersInfo.IsNewAudience(lasttoken, scopes))
                 {
                     if (app == null)
                     {
@@ -162,6 +162,42 @@ namespace AASPGlobalLibrary
                 }
             }
 
+            static string GetCurrentAudience(string token)
+            {
+                tokenCredential ??= new InteractiveBrowserCredential();
+                JwtSecurityToken jwtSecurity = ParseJwt(token);
+                return jwtSecurity.Payload["aud"].ToString();
+            }
+            public static bool IsNewAudience(string token, string[] scopes)
+            {
+                bool _newAud = true;
+                if (token != "")
+                {
+                    string _aud = GetCurrentAudience(token);
+                    for (int i = 0; i < scopes.Length; i++)
+                    {
+                        if (scopes[i].Contains(_aud))
+                        {
+                            _newAud = false;
+                            break;
+                        }
+                    }
+                    return _newAud;
+                }
+                return _newAud;
+            }
+            public static bool IsNewAudience(string token, string scope)
+            {
+                bool _newAud = true;
+                if (token != "")
+                {
+                    string _aud = GetCurrentAudience(token);
+                    if (scope.Contains(_aud))
+                        _newAud = false;
+                }
+                return _newAud;
+            }
+
             public static async Task<string> GetUsersEmail(TokenCredential tokenCredential)
             {
                 JwtSecurityToken jwtSecurity = ParseJwt(await GetKeyVaultImpersonationToken(tokenCredential));
@@ -219,7 +255,7 @@ namespace AASPGlobalLibrary
             string lasttoken = "";
             public async Task<string> GetToken(TokenCredential _tokenCredential, string[] scopes)
             {
-                if (DateTime.Now >= lasttime)
+                if (DateTime.Now >= lasttime || JwtGetUsersInfo.IsNewAudience(lasttoken, scopes))
                 {
                     AccessToken _Local = await _tokenCredential.GetTokenAsync(new TokenRequestContext(scopes), new CancellationToken());
                     lasttime = _Local.ExpiresOn.DateTime;
@@ -235,16 +271,16 @@ namespace AASPGlobalLibrary
 
             public async Task<string> GetToken(string tenantid, string clientid, string clientsecret, string scope)
             {
-                if (DateTime.Now >= lasttime)
+                if (DateTime.Now >= lasttime || JwtGetUsersInfo.IsNewAudience(lasttoken, scope))
                 {
                     using HttpClient client = new();
                     var data = new[]
                     {
-                            new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                            new KeyValuePair<string, string>("client_id", clientid),
-                            new KeyValuePair<string, string>("scope", scope),
-                            new KeyValuePair<string, string>("client_secret", clientsecret),
-                        };
+                        new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                        new KeyValuePair<string, string>("client_id", clientid),
+                        new KeyValuePair<string, string>("scope", scope),
+                        new KeyValuePair<string, string>("client_secret", clientsecret)
+                    };
                     var formurl = new FormUrlEncodedContent(data);
                     HttpResponseMessage response = await client.PostAsync("https://login.microsoftonline.com/" + tenantid + "/oauth2/v2.0/token", formurl);
                     JSONOAuthToken oauth = JsonSerializer.Deserialize<JSONOAuthToken>(await response.Content.ReadAsStringAsync());

@@ -181,7 +181,7 @@ namespace AASPGlobalLibrary
             public Requiredresourceaccess[]? requiredResourceAccess { get; set; }
             //public Web web { get; set; }
 
-            public JSONAutoCreateDataverseAPI(string displayName)
+            public JSONAutoCreateDataverseAPI(string displayName, bool isCosmos=false)
             {
                 this.displayName = displayName;
 
@@ -193,17 +193,19 @@ namespace AASPGlobalLibrary
                 //web.implicitGrantSettings.enableIdTokenIssuance = false;
                 //web.redirectUris = new string[] { APIRedirectUrls.localhost };
 
-                requiredResourceAccess = new Requiredresourceaccess[2];
-
                 //type is the same for all at this time
                 string type = "Scope";
 
-                //Microsoft Graph
-                requiredResourceAccess[0] = new()
+                if (!isCosmos)
                 {
-                    resourceAppId = APIPermissionIds.GraphAppId,
-                    resourceAccess = new Resourceaccess[2]
+                    requiredResourceAccess = new Requiredresourceaccess[2];
+
+                    //Microsoft Graph
+                    requiredResourceAccess[0] = new()
                     {
+                        resourceAppId = APIPermissionIds.GraphAppId,
+                        resourceAccess = new Resourceaccess[2]
+                        {
                         new()
                         {
                             id = APIPermissionIds.D_GraphUserReadId,
@@ -211,25 +213,26 @@ namespace AASPGlobalLibrary
                         },
                         new()
                         {
-                            id = APIPermissionIds.A_GraphMailSendId,
+                            id = APIPermissionIds.D_GraphMailSendId,
                             type = type
                         }
-                    }
-                };
+                        }
+                    };
 
-                //Dynamics CRM
-                requiredResourceAccess[1] = new()
-                {
-                    resourceAppId = APIPermissionIds.DynamicsAppId,
-                    resourceAccess = new Resourceaccess[1]
+                    //Dynamics CRM
+                    requiredResourceAccess[1] = new()
                     {
+                        resourceAppId = APIPermissionIds.DynamicsAppId,
+                        resourceAccess = new Resourceaccess[1]
+                        {
                         new()
                         {
                             id = APIPermissionIds.D_DynamicsUserImpersonationId,
                             type = type
                         }
-                    }
-                };
+                        }
+                    };
+                }
             }
 
             public class Publicclient
