@@ -281,9 +281,15 @@ namespace AASPGlobalLibrary
         }
         public static async Task<string> PostJsonStringBearerWithODataAsync(string token, string baseUrl, string requestUrl, string json)
         {
-            string[] odataNames = { "OData-MaxVersion", "OData-Version" };
-            string[] odataValues = { "4.0", "4.0" };
-            return await PostJsonBearerCustomHeadersAsync(token, baseUrl, requestUrl, json, odataNames, odataValues);
+            HttpContent httpContent = ConvertJsonStringToHttpContent(json);
+            using HttpClient client = new();
+            client.DefaultRequestHeaders.Authorization = SetAuthorizationBearerHeader(token);
+            client.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
+            client.DefaultRequestHeaders.Add("OData-Version", "4.0");
+            client.BaseAddress = new Uri(baseUrl);
+
+            var response = await client.PostAsync(baseUrl + requestUrl, httpContent);
+            return await response.Content.ReadAsStringAsync();
             /*HttpContent httpContent = ConvertJsonStringToHttpContent(json);
             using HttpClient client = new();
             client.DefaultRequestHeaders.Authorization = SetAuthorizationBearerHeader(token);

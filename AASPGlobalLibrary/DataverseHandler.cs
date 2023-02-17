@@ -592,18 +592,18 @@ namespace AASPGlobalLibrary
 
         #region Handles System Account Creation
         public class JSONBusinessUnits
+        {
+            public string? odatacontext { get; set; }
+            public Value[]? value { get; set; }
+
+            public class Value
             {
-                public string? odatacontext { get; set; }
-                public Value[]? value { get; set; }
-
-                public class Value
-                {
-                    public string? odataetag { get; set; }
-                    public string? name { get; set; }
-                    public string? businessunitid { get; set; }
-                }
-
+                public string? odataetag { get; set; }
+                public string? name { get; set; }
+                public string? businessunitid { get; set; }
             }
+
+        }
 
         async Task<string> GetBusinessID(string baseUrl)
         {
@@ -654,17 +654,15 @@ namespace AASPGlobalLibrary
             public string? defaultodbfoldername { get; set; }
             public string? businessunitid { get; set; }
         }
+        /* Access Modes
+        0	Read-Write
+        1	Administrative
+        2	Read
+        3	Support User
+        4	Non-interactive - Default
+        5	Delegated Admin */
         public async Task<HttpResponseMessage> CreateSystemUser(string appRegistrationClientId, int accessMode = 4)
         {
-
-            /* Access Modes
-            0	Read-Write
-            1	Administrative
-            2	Read
-            3	Support User
-            4	Non-interactive
-            5	Delegated Admin */
-
             string businessID = await GetBusinessID(baseUrl);
             JSONPOSTSystemUser systemUser = new()
             {
@@ -796,16 +794,15 @@ namespace AASPGlobalLibrary
             }
             else
             {
-                var systemUserURL = "/api/data/v9.2/systemusers(" + systemuserId + ")";
+                /*
+                legacy? - no longer works for some reason.
+
+                var systemUserURL = "api/data/v9.2/systemusers(" + systemuserId + ")";
                 string odataid = "\"@odata.id\": \"" + baseUrl + systemUserURL + "\"";
                 string json = "{" + odataid + "}";
-                json = JsonSerializer.Serialize(json);
-
+                Newtonsoft.Json.JsonConvert.SerializeObject(json, Newtonsoft.Json.Formatting.Indented);
                 string fieldsecurityprofileid = "";
-
-                //JSONGetSecurityFields jsonSecurityFields = await HttpClientHandler.GetJsonAsync(token, baseUrl, "/api/data/v9.2/fieldsecurityprofiles", new JSONGetSecurityFields());
-                var securitystring = await HttpClientHandler.GetJsonStringAsync(token, baseUrl, "/api/data/v9.2/fieldsecurityprofiles");
-                Console.Write(securitystring);
+                var securitystring = await HttpClientHandler.GetJsonStringAsync(token, baseUrl, "api/data/v9.2/fieldsecurityprofiles");
                 JSONGetSecurityFields jsonSecurityFields = JsonSerializer.Deserialize<JSONGetSecurityFields>(securitystring);
                 for (int i = 0; i < jsonSecurityFields.value.Length; i++)
                 {
@@ -815,13 +812,25 @@ namespace AASPGlobalLibrary
                         break;
                     }
                 }
+                string requestUrl = "api/data/v9.2/fieldsecurityprofiles(" + fieldsecurityprofileid + ")/systemuserprofiles_association/$ref";
+                */
 
-                string requestUrl = "/api/data/v9.2/fieldsecurityprofiles(" + fieldsecurityprofileid + ")/systemuserprofiles_association/$ref";
+                string requestUrl = "api/data/v9.2/systemusers(" + systemuserId + ")/systemuserroles_association/$ref";
 
-                var response = await HttpClientHandler.PostJsonStringBearerWithODataAsync(token, baseUrl, requestUrl, json);
-                Console.Write(response);
+                JSONGetRoles jsonRoles = await HttpClientHandler.GetJsonAsync(token, baseUrl, new JSONGetRoles(), "/api/data/v9.2/roles");
+                string roleId = "";
+                for (int i = 0; i < jsonRoles.value.Length; i++)
+                {
+                    if (jsonRoles.value[i].name == "System Administrator")
+                    {
+                        roleId = jsonRoles.value[i].roleid;
+                        break;
+                    }
+                }
+                string json = "{" + "\"@odata.id\":\"" + baseUrl + "api/data/v9.2/roles(" + roleId + ")\"}";
+                json = json.Replace("\\", "");
+                _ = await HttpClientHandler.PostJsonStringBearerWithODataAsync(token, baseUrl, requestUrl, json);
                 Console.Write(Environment.NewLine + "System Administrator permission assigned.");
-                //return true;
             }
         }
         #endregion
@@ -839,7 +848,7 @@ namespace AASPGlobalLibrary
                 catch (Exception e)
                 {
                     //if (e.Message.Contains("Error: An attribute with the specified name "))
-                        //Console.Write(Environment.NewLine + createAttributeRequests[i].Attribute.SchemaName + " already exists, skipping");
+                    //Console.Write(Environment.NewLine + createAttributeRequests[i].Attribute.SchemaName + " already exists, skipping");
                     //else
                     Console.Write(Environment.NewLine + "Error: " + e.Message);
                 }
@@ -1066,6 +1075,54 @@ namespace AASPGlobalLibrary
                 public string? applicationid { get; set; }
             }
 
+        }
+        class JSONGetRoles
+        {
+            public string? odatacontext { get; set; }
+            public Value[]? value { get; set; }
+
+            public class Value
+            {
+                public string? odataetag { get; set; }
+                public string? overwritetime { get; set; }
+                public string? organizationid { get; set; }
+                public int? isinherited { get; set; }
+                public string? solutionid { get; set; }
+                public string? roleidunique { get; set; }
+                public string? _createdby_value { get; set; }
+                public string? roleid { get; set; }
+                public int? componentstate { get; set; }
+                public string? modifiedon { get; set; }
+                public string? _modifiedby_value { get; set; }
+                public string? _parentrootroleid_value { get; set; }
+                public bool? ismanaged { get; set; }
+                public string? createdon { get; set; }
+                public int? versionnumber { get; set; }
+                public string? _businessunitid_value { get; set; }
+                public string? name { get; set; }
+                public string? _parentroleid_value { get; set; }
+                public string? overriddencreatedon { get; set; }
+                public string? importsequencenumber { get; set; }
+                public string? _modifiedonbehalfby_value { get; set; }
+                public string? _roletemplateid_value { get; set; }
+                public string? _createdonbehalfby_value { get; set; }
+                public Iscustomizable? iscustomizable { get; set; }
+                public Canbedeleted? canbedeleted { get; set; }
+            }
+
+            public class Iscustomizable
+            {
+                public bool? Value { get; set; }
+                public bool? CanBeChanged { get; set; }
+                public string? ManagedPropertyLogicalName { get; set; }
+            }
+
+            public class Canbedeleted
+            {
+                public bool? Value { get; set; }
+                public bool? CanBeChanged { get; set; }
+                public string? ManagedPropertyLogicalName { get; set; }
+            }
         }
         class JSONGetSecurityFields
         {
