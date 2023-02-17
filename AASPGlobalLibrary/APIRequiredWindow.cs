@@ -9,18 +9,7 @@
             InitializeComponent();
             this.button1.Click += (sender, e) =>
             {
-                if (autoAppAccountCB.Checked)
-                {
-                    var results = MessageBox.Show("Make sure one does not already exist." + Environment.NewLine + "Press OK to continue.", "System Account Creation", MessageBoxButtons.OKCancel);
-                    if (results == DialogResult.OK)
-                    {
-                        CloseViaButton();
-                    }
-                }
-                else
-                {
-                    CloseViaButton();
-                }
+                CloseViaButton();
             };
         }
 
