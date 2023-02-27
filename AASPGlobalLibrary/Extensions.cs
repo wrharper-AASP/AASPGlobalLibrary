@@ -12,7 +12,7 @@ namespace AASPGlobalLibrary
     {
         public static async Task DownloadFileAsync(this HttpClient client, string url)
         {
-            SaveFileDialog dialog = new SaveFileDialog();
+            SaveFileDialog dialog = new();
             dialog.ShowDialog();
             using var s = await client.GetStreamAsync(new Uri(url));
             using var fs = new FileStream(dialog.FileName, FileMode.CreateNew);
@@ -20,7 +20,7 @@ namespace AASPGlobalLibrary
         }
         public static async Task DownloadFileAsync(string url)
         {
-            SaveFileDialog dialog = new SaveFileDialog();
+            SaveFileDialog dialog = new();
             dialog.ShowDialog();
             using var client = new HttpClient();
             using var s = await client.GetStreamAsync(new Uri(url));

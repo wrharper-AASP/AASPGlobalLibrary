@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -94,6 +95,19 @@ namespace AASPGlobalLibrary
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 Process.Start("open", url);
+            }
+        }
+
+        //fixes problems when trying to open a JSON file so it can be a file path or a website
+        public static void OpenPath(string path)
+        {
+            if (path.StartsWith("https://"))
+            {
+                OpenLink(path);
+            }
+            else
+            {
+                Process.Start(path);
             }
         }
 
