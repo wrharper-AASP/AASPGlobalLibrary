@@ -99,7 +99,7 @@ namespace AASPGlobalLibrary
         }
 
         //fixes problems when trying to open a JSON file so it can be a file path or a website
-        public static void OpenPath(string path)
+        public static void LoadPath(string path)
         {
             if (path.StartsWith("https://"))
             {
