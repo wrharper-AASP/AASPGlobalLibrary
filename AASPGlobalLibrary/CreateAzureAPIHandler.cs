@@ -23,6 +23,10 @@ namespace AASPGlobalLibrary
         public const string DynamicsAppId = "00000007-0000-0000-c000-000000000000";
         //Allows access to Dynamics 365 APIs as the signed-in user.
         public const string D_DynamicsUserImpersonationId = "78ce3f0f-a1ce-49c2-8cde-64b5c0896db4";
+
+        public const string CosmosAppId = "a232010e-820c-4083-83bb-3ace5fc29d0b";
+        //Allows delegated access to the Cosmos DB
+        public const string D_CosmosUserImpersonationId = "8741c20d-e8c0-41ff-8adf-b7b9ba168197";
     }
     //CRITICAL ERRORS WILL OCCUR: web redirect has been disabled. it was creating connection errors to dataverse.
     public class CreateAzureAPIHandler
@@ -196,40 +200,56 @@ namespace AASPGlobalLibrary
                 //type is the same for all at this time
                 string type = "Scope";
 
+                requiredResourceAccess = new Requiredresourceaccess[2];
+
+                //Microsoft Graph
+                requiredResourceAccess[0] = new()
+                {
+                    resourceAppId = APIPermissionIds.GraphAppId,
+                    resourceAccess = new Resourceaccess[2]
+                    {
+                    new()
+                    {
+                        id = APIPermissionIds.D_GraphUserReadId,
+                        type = type
+                    },
+                    new()
+                    {
+                        id = APIPermissionIds.D_GraphMailSendId,
+                        type = type
+                    }
+                    }
+                };
+
                 if (!isCosmos)
                 {
-                    requiredResourceAccess = new Requiredresourceaccess[2];
-
-                    //Microsoft Graph
-                    requiredResourceAccess[0] = new()
-                    {
-                        resourceAppId = APIPermissionIds.GraphAppId,
-                        resourceAccess = new Resourceaccess[2]
-                        {
-                        new()
-                        {
-                            id = APIPermissionIds.D_GraphUserReadId,
-                            type = type
-                        },
-                        new()
-                        {
-                            id = APIPermissionIds.D_GraphMailSendId,
-                            type = type
-                        }
-                        }
-                    };
-
                     //Dynamics CRM
                     requiredResourceAccess[1] = new()
                     {
                         resourceAppId = APIPermissionIds.DynamicsAppId,
                         resourceAccess = new Resourceaccess[1]
                         {
-                        new()
-                        {
-                            id = APIPermissionIds.D_DynamicsUserImpersonationId,
-                            type = type
+                            new()
+                            {
+                                id = APIPermissionIds.D_DynamicsUserImpersonationId,
+                                type = type
+                            }
                         }
+                    };
+                }
+                else
+                {
+                    //Dynamics CRM
+                    requiredResourceAccess[1] = new()
+                    {
+                        resourceAppId = APIPermissionIds.CosmosAppId,
+                        resourceAccess = new Resourceaccess[1]
+                        {
+                            new()
+                            {
+                                id = APIPermissionIds.D_CosmosUserImpersonationId,
+                                type = type
+                            }
                         }
                     };
                 }
