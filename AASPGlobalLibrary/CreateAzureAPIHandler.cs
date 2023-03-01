@@ -149,9 +149,9 @@ namespace AASPGlobalLibrary
             }
         }
 
-        public static async Task<Microsoft.Graph.Application> CreateAzureAPIAsync(GraphServiceClient gs, string displayName)
+        public static async Task<Microsoft.Graph.Application> CreateAzureAPIAsync(GraphServiceClient gs, string displayName, bool iscosmos=false)
         {
-            JSONAutoCreateDataverseAPI autoCreateDataverseAPI = new(displayName);
+            JSONAutoCreateDataverseAPI autoCreateDataverseAPI = new(displayName, iscosmos);
             var app = await gs.Applications.Request().AddAsync(new Microsoft.Graph.Application()
             {
                 DisplayName = autoCreateDataverseAPI.displayName,
@@ -185,7 +185,7 @@ namespace AASPGlobalLibrary
             public Requiredresourceaccess[]? requiredResourceAccess { get; set; }
             //public Web web { get; set; }
 
-            public JSONAutoCreateDataverseAPI(string displayName, bool isCosmos=false)
+            public JSONAutoCreateDataverseAPI(string displayName, bool isCosmos)
             {
                 this.displayName = displayName;
 
