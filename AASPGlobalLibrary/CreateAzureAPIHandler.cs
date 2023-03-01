@@ -162,6 +162,7 @@ namespace AASPGlobalLibrary
                 //Web = autoCreateDataverseAPI.web,
 
             });
+            await UpdateRedirectUrlsAsync(gs, app.Id, app.AppId);
             return app;
         }
 
