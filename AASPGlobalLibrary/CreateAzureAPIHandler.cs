@@ -207,18 +207,23 @@ namespace AASPGlobalLibrary
                 requiredResourceAccess[0] = new()
                 {
                     resourceAppId = APIPermissionIds.GraphAppId,
-                    resourceAccess = new Resourceaccess[2]
+                    resourceAccess = new Resourceaccess[3]
                     {
-                    new()
-                    {
-                        id = APIPermissionIds.D_GraphUserReadId,
-                        type = type
-                    },
-                    new()
-                    {
-                        id = APIPermissionIds.D_GraphMailSendId,
-                        type = type
-                    }
+                        new()
+                        {
+                            id = APIPermissionIds.D_GraphUserReadId,
+                            type = type
+                        },
+                        new()
+                        {
+                            id = APIPermissionIds.D_GraphMailSendId,
+                            type = type
+                        },
+                        new()
+                        {
+                            id = APIPermissionIds.A_GraphMailSendId,
+                            type = "Role"
+                        }
                     }
                 };
 
