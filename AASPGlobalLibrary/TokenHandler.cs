@@ -8,6 +8,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 
 //Removes a lot of the complexity for Azure Authentication and automatically handles tokens
+
+//JWT reference: https://learn.microsoft.com/en-us/azure/active-directory/develop/id-tokens
 namespace AASPGlobalLibrary
 {
     public class TokenHandler

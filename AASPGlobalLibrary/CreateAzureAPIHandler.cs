@@ -149,8 +149,33 @@ namespace AASPGlobalLibrary
             }
         }
 
-        public static async Task<Microsoft.Graph.Application> CreateAzureAPIAsync(GraphServiceClient gs, string displayName, bool iscosmos=false)
+        public static async Task<Microsoft.Graph.Application> CreateAzureAPIAsync(GraphServiceClient gs, string displayName, bool iscosmos = false)
         {
+            JSONAutoCreateDataverseAPI autoCreateDataverseAPI = new(displayName, iscosmos);
+            var app = await gs.Applications.Request().AddAsync(new Microsoft.Graph.Application()
+            {
+                DisplayName = autoCreateDataverseAPI.displayName,
+                SignInAudience = autoCreateDataverseAPI.signInaudience,
+                Tags = autoCreateDataverseAPI.tags,
+                PublicClient = new PublicClientApplication() { RedirectUris = autoCreateDataverseAPI.publicClient.redirectUris }, // autoCreateDataverseAPI.publicClient.,
+                RequiredResourceAccess = autoCreateDataverseAPI.requiredResourceAccess
+                //Web = autoCreateDataverseAPI.web,
+
+            });
+            await gs.ServicePrincipals.Request().AddAsync(new()
+            {
+                AppId = app.AppId,
+                DisplayName = app.DisplayName,
+                Tags = app.Tags,
+                ServicePrincipalType = "Application",
+            });
+            await UpdateRedirectUrlsAsync(gs, app.Id, app.AppId);
+            return app;
+        }
+
+        public static async Task<Microsoft.Graph.Application> CreateAzureAPIAsync(string displayName, bool iscosmos = false)
+        {
+            GraphServiceClient gs = GraphHandler.GetServiceClientWithoutAPI();
             JSONAutoCreateDataverseAPI autoCreateDataverseAPI = new(displayName, iscosmos);
             var app = await gs.Applications.Request().AddAsync(new Microsoft.Graph.Application()
             {
@@ -161,6 +186,13 @@ namespace AASPGlobalLibrary
                 RequiredResourceAccess = autoCreateDataverseAPI.requiredResourceAccess,
                 //Web = autoCreateDataverseAPI.web,
 
+            });
+            await gs.ServicePrincipals.Request().AddAsync(new()
+            {
+                AppId = app.AppId,
+                DisplayName = app.DisplayName,
+                Tags = app.Tags,
+                ServicePrincipalType = "Application",
             });
             await UpdateRedirectUrlsAsync(gs, app.Id, app.AppId);
             return app;
