@@ -34,7 +34,7 @@ namespace AASPGlobalLibrary
         const string signInAudience = "AzureADandPersonalMicrosoftAccount";
         const string noSDKSupport = "NoLiveSdkSupport";
 
-        public static async Task<string> AddSecretClientPasswordAsync(GraphServiceClient gs, string appObjectId, string appid, string secretDisplayName, bool infiniteloop = true)
+        public static async Task<string> AddSecretClientPasswordAsync(GraphServiceClient gs, string appObjectId, string secretDisplayName, bool infiniteloop = true)
         {
             JSONGetClientSecretResponseDataverseAPI content = new()
             {
@@ -47,8 +47,11 @@ namespace AASPGlobalLibrary
                 {
                     try
                     {
-                        var publicClient = new JSONAddClientInfoDataverseAPI.Publicclient(appid);
-                        var end = await gs.Applications[appObjectId].AddPassword(JSONAddClientInfoDataverseAPI.Publicclient.PasswordCredentials(secretDisplayName)).Request().PostAsync();
+                        PasswordCredential credential = new()
+                        {
+                            DisplayName = secretDisplayName
+                        };
+                        var end = await gs.Applications[appObjectId].AddPassword(credential).Request().PostAsync();
 
                         content.secretText = end.SecretText;
 
@@ -62,7 +65,7 @@ namespace AASPGlobalLibrary
                         //reduce the spam to azure servers and graph api
                         await Task.Delay(5000);
                         if (ex.Message.StartsWith("Code: Request_ResourceNotFound"))
-                            Console.Write(Environment.NewLine + "Waiting for app resource to add secret for: " + appid);
+                            Console.Write(Environment.NewLine + "Waiting for app resource to add secret for object id: " + appObjectId);
                         else
                             Console.Write(Environment.NewLine + ex.Message);
                     }
@@ -72,8 +75,11 @@ namespace AASPGlobalLibrary
             {
                 try
                 {
-                    var publicClient = new JSONAddClientInfoDataverseAPI.Publicclient(appid);
-                    var end = await gs.Applications[appObjectId].AddPassword(JSONAddClientInfoDataverseAPI.Publicclient.PasswordCredentials(secretDisplayName)).Request().PostAsync();
+                    PasswordCredential credential = new()
+                    {
+                        DisplayName = secretDisplayName
+                    };
+                    var end = await gs.Applications[appObjectId].AddPassword(credential).Request().PostAsync();
 
                     content.secretText = end.SecretText;
 
@@ -337,14 +343,6 @@ namespace AASPGlobalLibrary
                     redirectUris = new string[] { Globals.WebBrokerMSAppxWebLoginAuth(appid), Globals.NativeLoginAuth, localhost1, localhost2, localhost3, localhost4 };
                 }
                 public string[] redirectUris;
-
-                public static PasswordCredential PasswordCredentials(string displayName)
-                {
-                    return new PasswordCredential()
-                    {
-                        DisplayName = displayName
-                    };
-                }
             }
         }
         class JSONGetClientSecretResponseDataverseAPI
