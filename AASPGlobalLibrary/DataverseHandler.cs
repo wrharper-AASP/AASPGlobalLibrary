@@ -888,25 +888,27 @@ namespace AASPGlobalLibrary
         }
         async Task CreateWhatsAppDefaultColumns(ServiceClient service, string whatsAppDBName)
         {
-            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[5];
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
 
             createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, whatsAppDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, whatsAppDBName, 20);
             createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataMessage, whatsAppDBName, 4000);
             createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, whatsAppDBName, 20);
             createAttributeRequests[4] = CreateAttributeMetaData(DbInfo.metadataTimestamp, whatsAppDBName, 100);
+            createAttributeRequests[5] = CreateAttributeMetaData(DbInfo.metadataMediaIdentifier, whatsAppDBName, 30);
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
         async Task CreateSMSDefaultColumns(ServiceClient service, string smsDBName)
         {
-            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[5];
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
 
             createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, smsDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, smsDBName, 20);
             createAttributeRequests[2] = CreateAttributeMetaData(DbInfo.metadataMessage, smsDBName, 4000);
             createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, smsDBName, 20);
             createAttributeRequests[4] = CreateAttributeMetaData(DbInfo.metadataTimestamp, smsDBName, 100);
+            createAttributeRequests[5] = CreateAttributeMetaData(DbInfo.metadataMediaIdentifier, smsDBName, 100);
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
@@ -1062,6 +1064,7 @@ namespace AASPGlobalLibrary
             public string? metadataPhoneNumberID { get; set; }
             public string? metadataEmailAccount { get; set; }
             public string? metadataDisplayName { get; set; }
+            public string? metadataMediaIdentifier { get; set; }
         }
         class JSONGetSystemUsers
         {
