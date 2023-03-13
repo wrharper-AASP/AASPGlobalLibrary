@@ -134,7 +134,7 @@ namespace AASPGlobalLibrary
         #endregion
 
         #region JWT
-        public static class JwtGetUsersInfo
+        public class JwtGetUsersInfo
         {
             static JwtSecurityToken ParseJwt(string token)
             {

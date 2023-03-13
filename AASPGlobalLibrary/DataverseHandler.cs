@@ -6,6 +6,8 @@ using System.Text.Json;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
 using Azure.Core;
+using System.Xml.Linq;
+using static Azure.Core.HttpHeader;
 
 /*
 this will be important when constraining lengths to DB's for perfect locked sizes if the need arises.
@@ -888,7 +890,7 @@ namespace AASPGlobalLibrary
         }
         async Task CreateWhatsAppDefaultColumns(ServiceClient service, string whatsAppDBName)
         {
-            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[7];
 
             createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, whatsAppDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, whatsAppDBName, 20);
@@ -896,12 +898,25 @@ namespace AASPGlobalLibrary
             createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, whatsAppDBName, 20);
             createAttributeRequests[4] = CreateAttributeMetaData(DbInfo.metadataTimestamp, whatsAppDBName, 100);
             createAttributeRequests[5] = CreateAttributeMetaData(DbInfo.metadataMediaIdentifier, whatsAppDBName, 30);
+            createAttributeRequests[6] = new CreateAttributeRequest
+            {
+                //must be lowercase or errors will occur
+                EntityName = DbInfo.StartingPrefix + whatsAppDBName.ToLower() + "es",
+                Attribute = new BigIntAttributeMetadata
+                {
+                    LogicalName = DbInfo.metadataCounterName,
+                    //must be lowercase or errors will occur
+                    SchemaName = DbInfo.StartingPrefix + DbInfo.metadataCounterName.ToLower() + "es",
+                    RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.None),
+                    DisplayName = new Microsoft.Xrm.Sdk.Label(DbInfo.metadataCounterName, 1033)
+                }
+            };
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
         async Task CreateSMSDefaultColumns(ServiceClient service, string smsDBName)
         {
-            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[6];
+            CreateAttributeRequest[] createAttributeRequests = new CreateAttributeRequest[7];
 
             createAttributeRequests[0] = CreateAttributeMetaData(DbInfo.metadataEmailNonAccount, smsDBName, 36);
             createAttributeRequests[1] = CreateAttributeMetaData(DbInfo.metadataFrom, smsDBName, 20);
@@ -909,6 +924,19 @@ namespace AASPGlobalLibrary
             createAttributeRequests[3] = CreateAttributeMetaData(DbInfo.metadataTo, smsDBName, 20);
             createAttributeRequests[4] = CreateAttributeMetaData(DbInfo.metadataTimestamp, smsDBName, 100);
             createAttributeRequests[5] = CreateAttributeMetaData(DbInfo.metadataMediaIdentifier, smsDBName, 100);
+            createAttributeRequests[6] = new CreateAttributeRequest
+            {
+                //must be lowercase or errors will occur
+                EntityName = DbInfo.StartingPrefix + smsDBName.ToLower() + "es",
+                Attribute = new BigIntAttributeMetadata
+                {
+                    LogicalName = DbInfo.metadataCounterName,
+                    //must be lowercase or errors will occur
+                    SchemaName = DbInfo.StartingPrefix + DbInfo.metadataCounterName.ToLower() + "es",
+                    RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.None),
+                    DisplayName = new Microsoft.Xrm.Sdk.Label(DbInfo.metadataCounterName, 1033)
+                }
+            };
 
             await RunMutiplePushes(service, createAttributeRequests);
         }
@@ -1065,6 +1093,7 @@ namespace AASPGlobalLibrary
             public string? metadataEmailAccount { get; set; }
             public string? metadataDisplayName { get; set; }
             public string? metadataMediaIdentifier { get; set; }
+            public string? metadataCounterName { get; set; }
         }
         class JSONGetSystemUsers
         {
